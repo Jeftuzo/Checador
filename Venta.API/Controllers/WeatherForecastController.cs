@@ -22,13 +22,6 @@ namespace Venta.API.Controllers
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
-            var producto = new Producto
-            {
-                Nombre = "Producto de prueba 1",
-                Precio = 9.99m
-            };
-            _context.Productos.Add(producto);
-            _context.SaveChanges();
 
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
