@@ -1,6 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Venta.API.Data;
+using Venta.API.Services;
 
 namespace Venta.API
 {
@@ -20,6 +21,8 @@ namespace Venta.API
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+
+            builder.Services.AddScoped<ProductosServices>();
 
             var app = builder.Build();
 
