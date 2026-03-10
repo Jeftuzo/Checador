@@ -24,6 +24,16 @@ namespace Venta.API
 
             builder.Services.AddScoped<ProductosServices>();
 
+            builder.Services.AddCors(options => //La seguridad. Previene ataques por DDOS. Permites los origenes y los metodos.
+            {
+                options.AddPolicy("AllowAll",policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -33,6 +43,8 @@ namespace Venta.API
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors("AllowAll");
 
             app.UseAuthorization();
 
