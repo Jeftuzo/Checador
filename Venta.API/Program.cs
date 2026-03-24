@@ -1,7 +1,5 @@
 
 using Microsoft.EntityFrameworkCore;
-using Venta.API.Data;
-using Venta.API.Services;
 
 namespace Venta.API
 {
@@ -10,29 +8,8 @@ namespace Venta.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
-
-            // Add services to the container.
-
-            builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
-
-            builder.Services.AddScoped<ProductosServices>();
-
-            builder.Services.AddCors(options => //La seguridad. Previene ataques por DDOS. Permites los origenes y los metodos.
-            {
-                options.AddPolicy("AllowAll",policy =>
-                {
-                    policy.AllowAnyOrigin()
-                          .AllowAnyMethod()
-                          .AllowAnyHeader();
-                });
-            });
+            builder.Services.ConfigurandoDependencias(builder.Configuration);
 
             var app = builder.Build();
 
