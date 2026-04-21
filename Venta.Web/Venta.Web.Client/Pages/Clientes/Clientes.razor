@@ -1,0 +1,111 @@
+﻿@page "/clientes"
+@using Venta.Web.Client.Dtos
+@using Venta.Web.Client.Dtos.Clientes
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>Clientes</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Clientes</h1>
+    <button class="btn btn-success" @onclick="IrAAgregar">
+        <i class="bi bi-plus-circle"></i> Agregar Cliente
+    </button>
+</div>
+
+@if (clientes == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else if (clientes.Length == 0)
+{
+    <p>No se encontraron clientes.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th style="width: 150px">Acciones</th>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in clientes)
+            {
+                <tr>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-primary btn-sm" @onclick="() => Editar(item.Id)">
+                                Editar
+                            </button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => Eliminar(item.Id)">
+                                Eliminar
+                            </button>
+                        </div>
+                    </td>
+                    <td>@item.Id</td>
+                    <td>@item.Nombre</td>
+                    <td>@item.Email</td>
+                    <td>@item.Telefono</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private ClienteDto[]? clientes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarClientes();
+    }
+
+    private async Task CargarClientes()
+    {
+        try
+        {
+            clientes = await Http.GetFromJsonAsync<ClienteDto[]>("api/clientes");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar clientes: {ex.Message}");
+        }
+    }
+
+    private void IrAAgregar()
+    {
+        Navigation.NavigateTo("/clientes/nuevo");
+    }
+
+    private void Editar(int id)
+    {
+        Navigation.NavigateTo($"/clientes/editar/{id}");
+    }
+
+    private async Task Eliminar(int id)
+    {
+        var confirmado = await JS.InvokeAsync<bool>("confirm", "¿Estás seguro de que deseas eliminar este cliente?");
+
+        if (confirmado)
+        {
+            try
+            {
+                var response = await Http.DeleteAsync($"api/clientes/{id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    await CargarClientes();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al eliminar: {ex.Message}");
+            }
+        }
+    }
+}

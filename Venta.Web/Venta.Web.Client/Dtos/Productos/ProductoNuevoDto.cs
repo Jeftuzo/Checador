@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Venta.Web.Client.Dtos
+namespace Venta.Web.Client.Dtos.Productos
 {
     public class ProductoNuevoDto
     {

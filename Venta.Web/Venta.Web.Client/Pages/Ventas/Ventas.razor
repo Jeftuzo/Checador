@@ -1,51 +1,62 @@
-﻿@page "/productos"
+﻿@page "/ventas"
 @using Venta.Web.Client.Dtos
+@using Venta.Web.Client.Dtos.Ventas
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>Ventas</PageTitle>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Productos</h1>
+    <h1>Ventas Realizadas</h1>
     <button class="btn btn-success" @onclick="IrAAgregar">
-        <i class="bi bi-plus-circle"></i> Agregar Producto
+        <i class="bi bi-plus-circle"></i> Agregar Venta
     </button>
 </div>
 
-@if (productos == null)
+@if (ventas == null)
 {
-    <p><em>Cargando...</em></p>
+    <p><em>Cargando historial de ventas...</em></p>
 }
-else if (productos.Length == 0)
+else if (ventas.Length == 0)
 {
-    <p>No se encontraron productos.</p>
+    <p>No se encontraron ventas registradas.</p>
 }
 else
 {
-    <table class="table table-striped">
+    <table class="table table-striped table-hover">
         <thead>
             <tr>
                 <th style="width: 150px">Acciones</th>
                 <th>Id</th>
-                <th>Nombre</th>
-                <th>Precio</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Total</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in productos)
+            @foreach (var item in ventas)
             {
                 <tr>
                     <td>
                         <div class="btn-group" role="group">
+
                             <button class="btn btn-primary btn-sm" @onclick="() => Editar(item.Id)">
+                                <i class="bi bi-pencil"></i>
                                 Editar
                             </button>
+
                             <button class="btn btn-danger btn-sm" @onclick="() => Eliminar(item.Id)">
+                                <i class="bi bi-trash"></i>
                                 Eliminar
                             </button>
+
                         </div>
                     </td>
                     <td>@item.Id</td>
-                    <td>@item.Nombre</td>
-                    <td>@item.Precio.ToString("C")</td>
+                    <td>@item.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@item.NombreCliente</td>
+                    <td>@item.Total.ToString("C")</td>
                 </tr>
             }
         </tbody>
@@ -53,47 +64,47 @@ else
 }
 
 @code {
-    private ProductoDto[]? productos;
+    private VentaDto[]? ventas;
 
     protected override async Task OnInitializedAsync()
     {
-        await CargarProductos();
+        await CargarVentas();
     }
 
-    private async Task CargarProductos()
+    private async Task CargarVentas()
     {
         try
         {
-            productos = await Http.GetFromJsonAsync<ProductoDto[]>("api/productos");
+            ventas = await Http.GetFromJsonAsync<VentaDto[]>("api/ventas");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error al cargar productos: {ex.Message}");
+            Console.WriteLine($"Error al cargar ventas: {ex.Message}");
         }
     }
 
     private void IrAAgregar()
     {
-        Navigation.NavigateTo("/productos/nuevo");
+        Navigation.NavigateTo("/ventas/nuevo");
     }
 
     private void Editar(int id)
     {
-        Navigation.NavigateTo($"/productos/editar/{id}");
+        Navigation.NavigateTo($"/ventas/editar/{id}");
     }
-
+        
     private async Task Eliminar(int id)
     {
-        var confirmado = await Task.FromResult(true);
+        var confirmado = await JS.InvokeAsync<bool>("confirm", "¿Estás seguro de que deseas eliminar esta venta?");
 
         if (confirmado)
         {
             try
             {
-                var response = await Http.DeleteAsync($"api/productos/{id}");
+                var response = await Http.DeleteAsync($"api/ventas/{id}");
                 if (response.IsSuccessStatusCode)
                 {
-                    await CargarProductos();
+                    await CargarVentas();
                 }
             }
             catch (Exception ex)

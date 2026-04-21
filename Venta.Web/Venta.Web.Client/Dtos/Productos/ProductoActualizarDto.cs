@@ -1,4 +1,4 @@
-﻿namespace Venta.Web.Client.Dtos
+﻿namespace Venta.Web.Client.Dtos.Productos
 {
     public class ProductoActualizarDto
     {
