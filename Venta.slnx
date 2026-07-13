@@ -1,5 +1,0 @@
-<Solution>
-  <Project Path="Venta.API/Venta.API.csproj" />
-  <Project Path="Venta.Web/Venta.Web.Client/Venta.Web.Client.csproj" Id="b0822b83-5e83-4bda-ab02-d8089b28059e" />
-  <Project Path="Venta.Web/Venta.Web/Venta.Web.csproj" Id="ef02ad84-1ed2-491a-a5b3-4bc697d4e7dd" />
-</Solution>

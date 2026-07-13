@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Checador.API/Checador.API.csproj" />
+  <Project Path="Checador.Web/Checador.Web.Client/Checador.Web.Client.csproj" />
+  <Project Path="Checador.Web/Checador.Web/Checador.Web.csproj" />
+</Solution>
