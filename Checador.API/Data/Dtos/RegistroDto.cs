@@ -6,7 +6,7 @@ namespace Checador.API.Data.Dtos
     {
         [Required(ErrorMessage = "El número de empleado es requerido")]
         public string NumeroEmpleado { get; set; } = null!;
-
         public string Foto { get; set; } = null!;
+
     }
 }

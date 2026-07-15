@@ -10,6 +10,9 @@ namespace Checador.API.Data.Entities
 
         [Required]
         public string NumeroEmpleado { get; set; } = null!;
+        public string Nombre { get; set; } = null!;
+        public string ApellidoPa { get; set; } = null!;
+        public string ApellidoMa { get; set; } = null!;
         public DateTime? HoraEntrada { get; set; }
         public DateTime? HoraSalida { get; set; }
 

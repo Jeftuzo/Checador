@@ -9,7 +9,7 @@
 <div class="container mt-5 text-center">
     <div class="row justify-content-center">
         <div class="col-md-6 card p-4 shadow-sm">
-            <h3 class="mb-4 text-primary"><i class="bi bi-clock-history"></i> Reloj Checador de Asistencia</h3>
+            <h3 class="mb-4 text-primary"><i class="bi bi-clock-history"></i> Checador de Asistencia</h3>
 
             <div class="video-container mb-4" style="background-color: #000; border-radius: 8px; overflow: hidden; height: 300px;">
                 <video id="videoFeed" width="100%" height="300" autoplay muted playsinline></video>
@@ -34,7 +34,7 @@
                     }
                     else
                     {
-                        <span><i class="bi bi-camera-fill"></i> Registrar Entrada / Salida</span>
+                        <span><i class="bi bi-camera-fill"></i> Registrar</span>
                     }
                 </button>
             </EditForm>
@@ -48,32 +48,6 @@
         </div>
     </div>
 </div>
-
-<script>
-    window.iniciarCamara = function (idVideo) {
-        const video = document.getElementById(idVideo);
-        if (!video) return;
-
-        navigator.mediaDevices.getUserMedia({ video: { width: 400, height: 300 }, audio: false })
-            .then(stream => {
-                video.srcObject = stream;
-            })
-            .catch(err => {
-                console.error("Error al acceder a la cámara web: ", err);
-                alert("No se pudo activar la cámara web. Revisa los permisos.");
-            });
-    };
-
-    window.capturaAutomatica = function (idVideo, idCanvas) {
-        const video = document.getElementById(idVideo);
-        const canvas = document.getElementById(idCanvas);
-        if (!video || !canvas) return "";
-
-        const contexto = canvas.getContext('2d');
-        contexto.drawImage(video, 0, 0, 400, 300);
-        return canvas.toDataURL('image/jpeg', 0.8);
-    };
-</script>
 
 @code {
     private RegistroDto registro = new RegistroDto();
@@ -110,21 +84,26 @@
             registro.Foto = fotoBase64;
 
             using var client = new HttpClient();
+                                                                            //o 5151 o 7002
+            var respuesta = await client.PostAsJsonAsync("https://localhost:7002/api/Asistencia/registrar", registro);
 
-            var respuesta = await client.PostAsJsonAsync("https://localhost:7246/api/Asistencia/registrar", registro);
+            var opcionesJson = new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
 
             if (respuesta.IsSuccessStatusCode)
             {
-                var resultadoOk = await respuesta.Content.ReadFromJsonAsync<RespuestaApi>();
+                var resultadoOk = await respuesta.Content.ReadFromJsonAsync<RespuestaApi>(opcionesJson);
                 esExito = true;
                 mensajeResultado = resultadoOk?.Mensaje ?? "Operación exitosa.";
                 registro.NumeroEmpleado = "";
             }
             else
             {
-                var resultadoError = await respuesta.Content.ReadFromJsonAsync<RespuestaApi>();
+                var errorTexto = await respuesta.Content.ReadAsStringAsync();
                 esExito = false;
-                mensajeResultado = resultadoError?.Mensaje ?? "Ocurrió un error en el servidor.";
+                mensajeResultado = $"Error ({respuesta.StatusCode}): El servidor bloqueó la petición.";
             }
         }
         catch (Exception ex)

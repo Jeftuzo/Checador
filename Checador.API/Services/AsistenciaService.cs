@@ -37,6 +37,9 @@ namespace Checador.API.Services
                 var nuevaAsistencia = new Asistencia
                 {
                     NumeroEmpleado = numeroEmpleado,
+                    Nombre = empleado.Nombre,
+                    ApellidoPa = empleado.ApellidoPa,
+                    ApellidoMa = empleado.ApellidoMa,
                     HoraEntrada = ahora,
                     HoraSalida = null,
                     Foto = foto

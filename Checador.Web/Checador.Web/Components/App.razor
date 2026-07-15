@@ -17,6 +17,31 @@
 <body>
     <Routes @rendermode="InteractiveWebAssembly" />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script>
+        window.iniciarCamara = function (idVideo) {
+        const video = document.getElementById(idVideo);
+        if (!video) return;
+
+        navigator.mediaDevices.getUserMedia({ video: { width: 400, height: 300 }, audio: false })
+        .then(stream => {
+        video.srcObject = stream;
+        })
+        .catch(err => {
+        console.error("Error al acceder a la cámara web: ", err);
+        alert("No se pudo activar la cámara web. Revisa los permisos.");
+        });
+        };
+
+        window.capturaAutomatica = function (idVideo, idCanvas) {
+        const video = document.getElementById(idVideo);
+        const canvas = document.getElementById(idCanvas);
+        if (!video || !canvas) return "";
+
+        const contexto = canvas.getContext('2d');
+        contexto.drawImage(video, 0, 0, 400, 300);
+        return canvas.toDataURL('image/jpeg', 0.8);
+        };
+    </script>
 </body>
 
 </html>

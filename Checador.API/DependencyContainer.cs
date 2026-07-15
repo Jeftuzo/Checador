@@ -9,6 +9,11 @@ namespace Checador.API
         {
             //SQL Server
             var SqlServerConnection = configuraciones.GetConnectionString("SqlServerConnection");
+
+            if (string.IsNullOrEmpty(SqlServerConnection))
+            {
+                throw new Exception("No se encontró la cadena de conexión 'SqlServerConnection' en el appsettings.json.");
+            }
             servicios.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(SqlServerConnection));
 
@@ -19,11 +24,13 @@ namespace Checador.API
 
 
             servicios.AddScoped<Checador.API.Services.AsistenciaService>();
-            servicios.ConfigureHttpJsonOptions(options =>
-            {
-                options.SerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
-                options.SerializerOptions.PropertyNamingPolicy = null;
-            });
+
+            servicios.AddControllers()
+                                 .AddJsonOptions(options =>
+                                 {
+                                     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+                                     options.JsonSerializerOptions.PropertyNamingPolicy = null;
+                                 });
 
             servicios.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
             {
@@ -42,13 +49,6 @@ namespace Checador.API
 
             servicios.AddHttpClient();
 
-            servicios.AddScoped(sp =>
-            {
-                var clientFactory = sp.GetRequiredService<IHttpClientFactory>();
-                var client = clientFactory.CreateClient();
-                client.BaseAddress = new Uri("https://localhost:7246/");
-                return client;
-            });
             return servicios;
         }
     }
