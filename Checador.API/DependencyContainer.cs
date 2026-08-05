@@ -8,19 +8,19 @@ namespace Checador.API
         public static IServiceCollection ConfigurandoDependencias(this IServiceCollection servicios, IConfiguration configuraciones)
         {
             //SQL Server
-            var SqlServerConnection = configuraciones.GetConnectionString("SqlServerConnection");
+            //var SqlServerConnection = configuraciones.GetConnectionString("SqlServerConnection");
 
-            if (string.IsNullOrEmpty(SqlServerConnection))
-            {
-                throw new Exception("No se encontró la cadena de conexión 'SqlServerConnection' en el appsettings.json.");
-            }
-            servicios.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(SqlServerConnection));
+            //if (string.IsNullOrEmpty(SqlServerConnection))
+            //{
+            //    throw new Exception("No se encontró la cadena de conexión 'SqlServerConnection' en el appsettings.json.");
+            //}
+            //servicios.AddDbContext<ApplicationDbContext>(options =>
+            //    options.UseSqlServer(SqlServerConnection));
 
             //PostgreSQL 17
-            //var postgresConnection = configuraciones.GetConnectionString("PostgreSQLConnection");
-            //servicios.AddDbContext<ApplicationDbContext>(options =>
-            //   options.UseNpgsql(postgresConnection));
+            var postgresConnection = configuraciones.GetConnectionString("PostgreSQLConnection");
+            servicios.AddDbContext<ApplicationDbContext>(options =>
+               options.UseNpgsql(postgresConnection));
 
 
             servicios.AddScoped<Checador.API.Services.AsistenciaService>();

@@ -7,13 +7,12 @@ a, .btn-link {
 }
 
 .btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    color: white !important;
+    background-color: #960E53 !important;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .content {
@@ -57,4 +56,31 @@ h1:focus {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
+}
+
+.btn-agregar {
+    background-color: #237469;
+    color: white;
+    border: none;
+}
+
+    .btn-agregar:hover {
+        background-color: #2F9B8C; 
+        color: white;
+    }
+
+.split-left {
+    background-color: #960E53;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4rem 2rem;
+}
+
+@media (max-width: 767.98px) {
+    .split-left {
+        display: none !important;
+    }
 }

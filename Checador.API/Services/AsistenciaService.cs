@@ -54,7 +54,6 @@ namespace Checador.API.Services
             else
             {
                 asistencia.HoraSalida = ahora;
-                asistencia.Foto = foto;
 
                 _context.Asistencias.Update(asistencia);
                 await _context.SaveChangesAsync();

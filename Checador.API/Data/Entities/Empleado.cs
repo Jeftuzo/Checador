@@ -8,16 +8,22 @@ namespace Checador.API.Data.Entities
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [Column("numeroEmpleado")]
         public string NumeroEmpleado { get; set; } = null!;
 
         [Required]
+        [Column("Nombre")]
         public string Nombre { get; set; } = null!;
         [Required]
+        [Column("apellidoPa")]
         public string ApellidoPa { get; set; } = null!;
+        [Column("apellidoMa")]
         public string ApellidoMa { get; set; } = null!;
         [Required]
+        [Column("Puesto")]
         public string Puesto { get; set; } = null!;
         [Required]
+        [Column("Departamento")]
         public string Departamento { get; set; } = null!;
         [JsonIgnore]
         public ICollection<Asistencia> Asistencias { get; set; } = new List<Asistencia>();

@@ -20,5 +20,7 @@
   <ItemGroup>
     <Folder Include="Migrations\" />
   </ItemGroup>
-
+	<Target Name="Limpieza" BeforeTargets="BeforeBuild">
+		<CallTarget Targets="Clean" />
+	</Target>
 </Project>

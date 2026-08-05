@@ -12,5 +12,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
   </ItemGroup>
-
+	<Target Name="Limpieza" BeforeTargets="BeforeBuild">
+		<CallTarget Targets="Clean" />
+	</Target>
 </Project>
