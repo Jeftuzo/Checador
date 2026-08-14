@@ -32,6 +32,8 @@
         });
         };
 
+
+        //Funcion para capturar la imagen
         window.capturaAutomatica = function (idVideo, idCanvas) {
         const video = document.getElementById(idVideo);
         const canvas = document.getElementById(idCanvas);
@@ -39,9 +41,15 @@
 
         const contexto = canvas.getContext('2d');
         contexto.drawImage(video, 0, 0, 400, 300);
+        //toDataURL lo comvierte a base64
         return canvas.toDataURL('image/jpeg', 0.8);
         };
     </script>
+
+    <script src="js/websdk.client.ui.js"></script>
+    <script src="js/fingerprint.sdk.js"></script>
+    <script src="js/lectorHuella.js"></script>
+
 </body>
 
 </html>

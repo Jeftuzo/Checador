@@ -1,5 +1,6 @@
-﻿using Checador.API.Data.Entities;
-using Checador.API.Data;
+﻿using Checador.API.Data;
+using Checador.API.Data.Dtos;
+using Checador.API.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Checador.API.Services
@@ -62,6 +63,8 @@ namespace Checador.API.Services
             }
         }
 
+
+        //Boorra las imagenes a partir de los 30 dias de antiguedad.
         private async Task OptimizarAlmacenamientoAsync()
         {
             DateTime limite = DateTime.Today.AddDays(-30);
@@ -80,6 +83,63 @@ namespace Checador.API.Services
                 _context.Asistencias.UpdateRange(registrosViejos);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<List<ReporteAsistenciaDto>> ObtenerReporteAsync(string tipo)
+        {
+            var fechaActual = DateTime.Today;
+            var query = _context.Asistencias.AsQueryable();
+
+            if (tipo == "dia")
+            {
+                query = query.Where(a => a.HoraEntrada >= fechaActual && a.HoraEntrada < fechaActual.AddDays(1));
+            }
+            else if (tipo == "semana")
+            {
+                int diferencia = (int)fechaActual.DayOfWeek - 1;
+                if (diferencia < 0) diferencia = 6;
+                var inicioSemana = fechaActual.AddDays(-diferencia);
+                var finSemana = inicioSemana.AddDays(7);
+
+                query = query.Where(a => a.HoraEntrada >= inicioSemana && a.HoraEntrada < finSemana);
+            }
+            else if (tipo == "mes")
+            {
+                query = query.Where(a => a.HoraEntrada.Value.Year == fechaActual.Year && a.HoraEntrada.Value.Month == fechaActual.Month);
+            }
+            else if (tipo == "ultimos30")
+            {
+                var treintaDiasAtras = fechaActual.AddDays(-30);
+                query = query.Where(a => a.HoraEntrada >= treintaDiasAtras);
+            }
+
+            var registros = await query.ToListAsync();
+
+            var reporteAgrupado = registros
+                .GroupBy(a => a.NumeroEmpleado)
+                .Select(g =>
+                {
+                    var primerRegistro = g.First();
+                    var ultimoRegistro = g.OrderByDescending(a => a.HoraEntrada).First();
+
+                    double totalMinutos = g.Where(a => a.HoraSalida.HasValue)
+                        .Sum(a => (a.HoraSalida.Value - a.HoraEntrada).Value.TotalMinutes);
+
+                    int horas = (int)(totalMinutos / 60);
+                    int minutos = (int)(totalMinutos % 60);
+
+                    return new ReporteAsistenciaDto
+                    {
+                        NumeroEmpleado = g.Key,
+                        NombreCompleto = $"{primerRegistro.Nombre} {primerRegistro.ApellidoPa} {primerRegistro.ApellidoMa}".Trim(),
+                        Puesto = _context.Empleados.Find(g.Key)?.Puesto ?? "Sin Puesto",
+                        DetalleTiempo = $"{horas} hrs {minutos} mins ({g.Count()} registros)",
+                        FotoBase64 = ultimoRegistro.Foto ?? string.Empty
+                    };
+                })
+                .ToList();
+
+            return reporteAgrupado;
         }
     }
 }

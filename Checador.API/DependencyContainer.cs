@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Checador.API.Data;
+﻿using Checador.API.Data;
+using Checador.API.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace Checador.API
 {
@@ -24,6 +25,7 @@ namespace Checador.API
 
 
             servicios.AddScoped<Checador.API.Services.AsistenciaService>();
+            servicios.AddScoped<IAdminService, AdminService>();
 
             servicios.AddControllers()
                                  .AddJsonOptions(options =>

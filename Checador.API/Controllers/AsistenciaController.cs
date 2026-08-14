@@ -35,5 +35,24 @@ namespace Checador.API.Controllers
 
             return Ok(respuestaJson); 
         }
+
+        [HttpGet("reporte")]
+        public async Task<ActionResult<List<ReporteAsistenciaDto>>> GetReporte([FromQuery] string tipo = "dia")
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(tipo))
+                {
+                    tipo = "dia";
+                }
+
+                var reporte = await _asistenciaService.ObtenerReporteAsync(tipo.ToLower());
+                return Ok(reporte);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno al generar el reporte: {ex.Message}");
+            }
+        }
     }
 }

@@ -14,6 +14,7 @@ namespace Checador.API.Data
 
         public DbSet<Empleado> Empleados { get; set; }
         public DbSet<Asistencia> Asistencias { get; set; }
+        public DbSet<Administrador> Administradores { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
