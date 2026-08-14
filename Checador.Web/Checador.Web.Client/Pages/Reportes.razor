@@ -25,10 +25,10 @@
 
             <div class="col-md-8 text-md-end">
                 <div class="btn-group" role="group">
-                    <button type="button" class="btn @(vistaActual == "dia" ? "btn-dark text-white" : "btn-outline-dark")" @onclick='() => CambiarVista("dia")'>Día</button>
+                    <button type="button" class="btn @(vistaActual == "día" ? "btn-dark text-white" : "btn-outline-dark")" @onclick='() => CambiarVista("dia")'>Día</button>
                     <button type="button" class="btn @(vistaActual == "semana" ? "btn-dark text-white" : "btn-outline-dark")" @onclick='() => CambiarVista("semana")'>Semana</button>
-                    <button type="button" class="btn @(vistaActual == "mes" ? "btn-dark text-white" : "btn-outline-dark")" @onclick='() => CambiarVista("mes")'>Mes</button>
-                    <button type="button" class="btn @(vistaActual == "ultimos30" ? "btn-dark text-white" : "btn-outline-dark")" @onclick='() => CambiarVista("ultimos30")'>Últimos 30 Días</button>
+                    <button type="button" class="btn @(vistaActual == "mes actual" ? "btn-dark text-white" : "btn-outline-dark")" @onclick='() => CambiarVista("mes")'>Mes</button>
+                    <button type="button" class="btn @(vistaActual == "ultimos 30 días" ? "btn-dark text-white" : "btn-outline-dark")" @onclick='() => CambiarVista("ultimos30")'>Últimos 30 Días</button>
                 </div>
                 <button class="btn btn-success ms-2 fw-bold" @onclick="CargarReportes">
                     <i class="bi bi-arrow-clockwise"></i> Actualizar
