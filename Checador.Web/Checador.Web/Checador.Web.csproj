@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -8,9 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\Images\direccion-general-del-registro-civil.png" />
+    <Content Remove="wwwroot\Images\logo-sonora.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Checador.Web.Client\Checador.Web.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Images\direccion-general-del-registro-civil.png" />
+    <None Include="wwwroot\Images\logo-sonora.png" />
   </ItemGroup>
 	<Target Name="Limpieza" BeforeTargets="BeforeBuild">
 		<CallTarget Targets="Clean" />
