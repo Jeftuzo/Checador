@@ -1,0 +1,121 @@
+﻿@page "/menu"
+@layout Checador.Web.Client.Layout.EmptyNavMenu
+
+<div class="container-fluid p-0" style="min-height: 100vh;">
+    <div class="row g-0" style="min-height: 100vh;">
+
+        <!-- PANEL INSTITUCIONAL -->
+        <div class="col-lg-5">
+            <PanelInstitucional Texto="Sistema de control de asistencia y administración de permisos del personal." />
+        </div>
+
+        <!-- MENÚ PRINCIPAL -->
+        <div class="col-lg-7 d-flex align-items-center justify-content-center"
+             style="background-color: #f4f6f9;">
+
+            <div class="container px-4 py-5">
+
+                <div class="text-center mb-5">
+                    <h1 class="fw-bold"
+                        style="color: #960E53;">
+                        Sistema de Asistencia
+                    </h1>
+
+                    <p class="text-muted">
+                        Seleccione el módulo al que desea acceder
+                    </p>
+                </div>
+
+                <div class="row g-4 justify-content-center">
+
+                    <!-- CHECADOR -->
+                    <div class="col-md-4">
+                        <div class="card shadow border-0 h-100 text-center p-4">
+
+                            <div class="mb-3">
+                                <i class="bi bi-person-check-fill"
+                                   style="font-size: 4rem; color: #960E53;">
+                                </i>
+                            </div>
+
+                            <h4 class="fw-bold">
+                                Checador
+                            </h4>
+
+                            <p class="text-muted">
+                                Registrar entrada o salida de empleados.
+                            </p>
+
+                            <a href="/"
+                               class="btn text-white fw-bold mt-auto"
+                               style="background-color: #960E53;">
+                                Ir al Checador
+                            </a>
+
+                        </div>
+                    </div>
+
+
+                    <!-- PERMISOS -->
+                    <div class="col-md-4">
+                        <div class="card shadow border-0 h-100 text-center p-4">
+
+                            <div class="mb-3">
+                                <i class="bi bi-calendar-check"
+                                   style="font-size: 4rem; color: #960E53;">
+                                </i>
+                            </div>
+
+                            <h4 class="fw-bold">
+                                Permisos
+                            </h4>
+
+                            <p class="text-muted">
+                                Solicitar, consultar y administrar permisos.
+                            </p>
+
+                            <a href="/permisos"
+                               class="btn text-white fw-bold mt-auto"
+                               style="background-color: #960E53;">
+                                Ir a Permisos
+                            </a>
+
+                        </div>
+                    </div>
+
+
+                    <!-- REPORTES -->
+                    <div class="col-md-4">
+                        <div class="card shadow border-0 h-100 text-center p-4">
+
+                            <div class="mb-3">
+                                <i class="bi bi-bar-chart-fill"
+                                   style="font-size: 4rem; color: #960E53;">
+                                </i>
+                            </div>
+
+                            <h4 class="fw-bold">
+                                Reportes
+                            </h4>
+
+                            <p class="text-muted">
+                                Consultar registros, horas y evidencias fotográficas.
+                            </p>
+
+                            <a href="/reportes"
+                               class="btn text-white fw-bold mt-auto"
+                               style="background-color: #960E53;">
+                                Ir a Reportes
+                            </a>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

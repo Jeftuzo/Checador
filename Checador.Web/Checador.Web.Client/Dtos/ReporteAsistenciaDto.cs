@@ -6,6 +6,9 @@
         public string NombreCompleto { get; set; } = "";
         public string Puesto { get; set; } = "";
         public string DetalleTiempo { get; set; } = "";
-        public string FotoBase64 { get; set; } = "";
+
+        public string FotoEntradaBase64 { get; set; } = "";
+
+        public string FotoSalidaBase64 { get; set; } = "";
     }
 }

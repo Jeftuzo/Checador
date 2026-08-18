@@ -8,15 +8,16 @@ namespace Checador.Web.Client
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
+            var apiBaseUrl =
+                builder.Configuration["ApiBaseUrl"]
+                ?? "http://localhost:5151/";
+
             builder.Services.AddScoped(sp => new HttpClient
             {
-                BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+                BaseAddress = new Uri(apiBaseUrl)
             });
 
             await builder.Build().RunAsync();
         }
-
-
-
     }
 }

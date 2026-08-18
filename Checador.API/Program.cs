@@ -7,12 +7,18 @@ namespace Checador.API
     {
         public static void Main(string[] args)
         {
-            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            AppContext.SetSwitch(
+                "Npgsql.EnableLegacyTimestampBehavior",
+                true);
+
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Configuration
-                .SetBasePath(Directory.GetCurrentDirectory ())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile(
+                    "appsettings.json",
+                    optional: false,
+                    reloadOnChange: true)
                 .AddEnvironmentVariables();
 
             builder.WebHost.ConfigureKestrel(options =>
@@ -20,20 +26,22 @@ namespace Checador.API
                 options.Limits.MaxRequestBodySize = 104857600;
             });
 
-            builder.Services.ConfigurandoDependencias(builder.Configuration);
+            builder.Services.ConfigurandoDependencias(
+                builder.Configuration);
 
             var app = builder.Build();
-            app.UseHttpsRedirection();
+
             app.UseRouting();
+
             app.UseCors("AllowAll");
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapControllers();
-            }
+            // Desactivado durante desarrollo.
+            // Evita redirecciones de http://localhost:5151
+            // hacia HTTPS.
+            // app.UseHttpsRedirection();
 
-            app.UseHttpsRedirection();
             app.UseAuthorization();
+
             app.MapControllers();
 
             app.Run();

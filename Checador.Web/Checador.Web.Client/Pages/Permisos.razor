@@ -1,0 +1,846 @@
+﻿@page "/permisos"
+@layout Checador.Web.Client.Layout.EmptyNavMenu
+@using System.Net.Http.Json
+@using Checador.Web.Client.Dtos.PermisosDtos
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<div class="container-fluid p-0" style="min-height: 100vh;">
+    <div class="row g-0" style="min-height: 100vh;">
+
+        
+        <div class="col-lg-5">
+            <PanelInstitucional Texto="Solicita y consulta tus permisos laborales de forma rápida y sencilla." />
+        </div>
+
+     
+        <div class="col-lg-7"
+             style="background-color: #f4f6f9;">
+
+            <div class="container-fluid py-4"
+                 style="background-color: #f4f6f9; min-height: 100vh;">
+
+                <div class="card shadow-lg p-4 border-0">
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="fw-bold mb-1" style="color: #960E53;">
+                                Permisos
+                            </h2>
+
+                            <p class="text-muted mb-0">
+                                Solicitud y administración de permisos de empleados
+                            </p>
+                        </div>
+
+                        <a href="/menu" class="btn btn-outline-secondary fw-bold">
+                            <i class="bi bi-house-door"></i> Menú Principal
+                        </a>
+                    </div>
+
+
+                    <!-- IDENTIFICAR USUARIO -->
+                    @if (perfil == null)
+                    {
+                        <div class="row justify-content-center py-5">
+                            <div class="col-md-6 col-lg-5">
+
+                                <div class="card border-0 shadow-sm p-4">
+
+                                    <h4 class="fw-bold text-center mb-3">
+                                        Acceso a Permisos
+                                    </h4>
+
+                                    <p class="text-muted text-center">
+                                        Ingrese su número de empleado para continuar.
+                                    </p>
+
+                                    <label class="form-label fw-bold">
+                                        Número de Empleado
+                                    </label>
+
+                                    <input type="text"
+                                           class="form-control form-control-lg mb-3 text-center"
+                                           @bind="numeroEmpleado"
+                                           placeholder="Ej. E001" />
+
+                                    <button class="btn btn-lg w-100 text-white fw-bold"
+                                            style="background-color: #960E53;"
+                                            disabled="@cargando"
+                                            @onclick="CargarPerfil">
+
+                                        @if (cargando)
+                                        {
+                                            <span class="spinner-border spinner-border-sm"></span>
+                                            <span> Cargando...</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Ingresar</span>
+                                        }
+
+                                    </button>
+
+                                    @if (!string.IsNullOrEmpty(mensaje))
+                                    {
+                                        <div class="alert alert-danger mt-3 text-center">
+                                            @mensaje
+                                        </div>
+                                    }
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- INFORMACIÓN USUARIO -->
+                        <div class="alert alert-light border shadow-sm mb-4">
+
+                            <div class="d-flex justify-content-between align-items-center">
+
+                                <div>
+                                    <strong>@perfil.NombreCompleto</strong>
+
+                                    <span class="badge ms-2"
+                                          style="background-color: #960E53;">
+                                        @perfil.Rol
+                                    </span>
+
+                                    <div class="text-muted small mt-1">
+                                        @perfil.NumeroEmpleado
+                                        -
+                                        @perfil.Departamento
+                                    </div>
+                                </div>
+
+                                <button class="btn btn-sm btn-outline-secondary"
+                                        @onclick="CerrarSesion">
+                                    Cambiar usuario
+                                </button>
+
+                            </div>
+                        </div>
+
+
+                        <!-- REGLAS -->
+                        <div class="alert alert-info mb-4">
+                            <strong>Reglas de permisos:</strong>
+
+                            máximo <strong>3 permisos al mes</strong>,
+                            hasta <strong>2 horas por permiso</strong>,
+                            dentro del horario de
+                            <strong>8:00 AM a 3:00 PM</strong>.
+                        </div>
+
+
+                        <!-- EMPLEADO: NUEVO PERMISO -->
+                        @if (perfil.Rol == "Empleado" ||
+                             perfil.Rol == "DirectorArea" ||
+                             perfil.Rol == "RRHH" ||
+                             perfil.Rol == "RRHHAdmin")
+                        {
+                            <div class="card border-0 shadow-sm mb-4">
+
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="fw-bold mb-0"
+                                        style="color: #960E53;">
+                                        Solicitar Permiso
+                                    </h5>
+                                </div>
+
+                                <div class="card-body">
+
+                                    <div class="row g-3">
+
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold">Fecha</label>
+
+                                            <InputDate @bind-Value="fechaPermiso"
+                                                       class="form-control" />
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <label class="form-label fw-bold">Hora Inicio</label>
+
+                                            <input type="time"
+                                                   class="form-control"
+                                                   @bind="horaInicio" />
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <label class="form-label fw-bold">Hora Fin</label>
+
+                                            <input type="time"
+                                                   class="form-control"
+                                                   @bind="horaFin" />
+                                        </div>
+
+                                        <div class="col-md-5">
+                                            <label class="form-label fw-bold">Motivo</label>
+
+                                            <input type="text"
+                                                   class="form-control"
+                                                   maxlength="500"
+                                                   placeholder="Motivo del permiso"
+                                                   @bind="nuevoPermiso.Motivo" />
+                                        </div>
+
+                                    </div>
+
+                                    <div class="text-end mt-3">
+
+                                        <button class="btn text-white fw-bold"
+                                                style="background-color: #960E53;"
+                                                disabled="@procesando"
+                                                @onclick="SolicitarPermiso">
+
+                                            @if (procesando)
+                                            {
+                                                <span class="spinner-border spinner-border-sm"></span>
+                                                <span> Guardando...</span>
+                                            }
+                                            else
+                                            {
+                                                <span>
+                                                    <i class="bi bi-plus-circle"></i>
+                                                    Solicitar Permiso
+                                                </span>
+                                            }
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        }
+
+
+                        @if (!string.IsNullOrEmpty(mensaje))
+                        {
+                            <div class="alert @(esExito ? "alert-success" : "alert-danger")">
+                                @mensaje
+                            </div>
+                        }
+
+
+                        <!-- TABLA -->
+                        <div class="card border-0 shadow-sm">
+
+                            <div class="card-header bg-white py-3">
+
+                                <div class="d-flex justify-content-between align-items-center">
+
+                                    <h5 class="fw-bold mb-0"
+                                        style="color: #960E53;">
+
+                                        @TituloTabla
+
+                                    </h5>
+
+                                    <button class="btn btn-sm btn-outline-success"
+                                            @onclick="CargarPermisos">
+
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                        Actualizar
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="card-body p-0">
+
+                                @if (cargandoPermisos)
+                                {
+                                    <div class="text-center py-5">
+
+                                        <div class="spinner-border"
+                                             style="color: #960E53;">
+                                        </div>
+
+                                        <div class="text-muted mt-2">
+                                            Cargando permisos...
+                                        </div>
+
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="table-responsive">
+
+                                        <table class="table table-striped table-hover align-middle mb-0">
+
+                                            <thead class="text-white"
+                                                   style="background-color: #960E53;">
+
+                                                <tr>
+                                                    <th>No. Empleado</th>
+
+                                                    @if (PuedeVerOtros)
+                                                    {
+                                                        <th>Empleado</th>
+                                                    }
+
+                                                    <th>Fecha</th>
+                                                    <th>Inicio</th>
+                                                    <th>Fin</th>
+                                                    <th>Motivo</th>
+                                                    <th>Estado</th>
+                                                    <th>Autorizado por</th>
+                                                    <th class="text-center">Acciones</th>
+                                                </tr>
+
+                                            </thead>
+
+                                            <tbody>
+
+                                                @if (permisos.Any())
+                                                {
+                                                    @foreach (var permiso in permisos)
+                                                    {
+                                                        <tr>
+
+                                                            <td>
+                                                                <strong>
+                                                                    @permiso.NumeroEmpleado
+                                                                </strong>
+                                                            </td>
+
+                                                            @if (PuedeVerOtros)
+                                                            {
+                                                                <td>
+                                                                    @(permiso.Empleado?.NombreCompleto
+                                                                        ?? permiso.NumeroEmpleado)
+                                                                </td>
+                                                            }
+
+                                                            <td>
+                                                                @permiso.Fecha.ToString("dd/MM/yyyy")
+                                                            </td>
+
+                                                            <td>
+                                                                @permiso.HoraInicio.ToString("HH:mm")
+                                                            </td>
+
+                                                            <td>
+                                                                @permiso.HoraFin.ToString("HH:mm")
+                                                            </td>
+
+                                                            <td>
+                                                                @(string.IsNullOrWhiteSpace(permiso.Motivo)
+                                                                    ? "Sin motivo"
+                                                                    : permiso.Motivo)
+                                                            </td>
+
+                                                            <td>
+                                                                <span class="badge @ClaseEstado(permiso.Estado)">
+                                                                    @permiso.Estado
+                                                                </span>
+                                                            </td>
+
+                                                            <td>
+                                                                @(permiso.AutorizadoPor ?? "-")
+                                                            </td>
+
+                                                            <td class="text-center">
+
+                                                                @if (PuedeAutorizar &&
+                                                                     permiso.Estado == "Pendiente")
+                                                                {
+                                                                    <button class="btn btn-sm btn-success me-1"
+                                                                            @onclick="() => CambiarEstado(permiso.Id, true)">
+                                                                        Autorizar
+                                                                    </button>
+
+                                                                    <button class="btn btn-sm btn-danger"
+                                                                            @onclick="() => CambiarEstado(permiso.Id, false)">
+                                                                        Rechazar
+                                                                    </button>
+                                                                }
+                                                                else if (permiso.NumeroEmpleado ==
+                                                                         perfil.NumeroEmpleado &&
+                                                                         permiso.Estado == "Pendiente")
+                                                                {
+                                                                    <button class="btn btn-sm btn-outline-danger"
+                                                                            @onclick="() => CancelarPermiso(permiso.Id)">
+                                                                        Cancelar
+                                                                    </button>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="text-muted">
+                                                                        -
+                                                                    </span>
+                                                                }
+
+                                                            </td>
+
+                                                        </tr>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr>
+                                                        <td colspan="9"
+                                                            class="text-center text-muted py-5">
+
+                                                            <i class="bi bi-folder2-open fs-1 d-block mb-2"></i>
+
+                                                            No hay permisos para mostrar.
+
+                                                        </td>
+                                                    </tr>
+                                                }
+
+                                            </tbody>
+
+                                        </table>
+
+                                    </div>
+                                }
+
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+@code {
+
+    private const string ApiBase = "api/Permisos";
+
+
+    private string numeroEmpleado = "";
+
+    private PerfilPermisoDto? perfil;
+
+    private List<PermisoDto> permisos = new();
+
+    private CrearPermisoDto nuevoPermiso = new();
+
+
+    private bool cargando = false;
+
+    private bool cargandoPermisos = false;
+
+    private bool procesando = false;
+
+    private bool esExito = false;
+
+    private string mensaje = "";
+
+
+    private DateTime fechaPermiso = DateTime.Today;
+
+    private TimeOnly? horaInicio = new TimeOnly(8, 0);
+
+    private TimeOnly? horaFin = new TimeOnly(10, 0);
+
+
+    private bool PuedeAutorizar =>
+        perfil?.Rol == "RRHHAdmin" ||
+        perfil?.Rol == "Admin";
+
+
+    private bool PuedeVerOtros =>
+        perfil?.Rol == "DirectorArea" ||
+        perfil?.Rol == "RRHH" ||
+        perfil?.Rol == "RRHHAdmin" ||
+        perfil?.Rol == "Admin";
+
+
+    private string TituloTabla
+    {
+        get
+        {
+            if (perfil == null)
+                return "Permisos";
+
+            return perfil.Rol switch
+            {
+                "DirectorArea" => "Permisos de mi Área",
+                "RRHH" => "Permisos de Todos los Empleados",
+                "RRHHAdmin" => "Administración de Permisos",
+                "Admin" => "Administración de Permisos",
+                _ => "Mis Permisos"
+            };
+        }
+    }
+
+
+    private async Task CargarPerfil()
+    {
+        mensaje = "";
+
+        if (string.IsNullOrWhiteSpace(numeroEmpleado))
+        {
+            mensaje = "Ingrese un número de empleado.";
+            return;
+        }
+
+        cargando = true;
+
+        try
+        {
+           
+
+            var respuesta = await Http.GetAsync(
+                $"{ApiBase}/perfil/{numeroEmpleado.Trim()}");
+
+            if (!respuesta.IsSuccessStatusCode)
+            {
+                mensaje = "El número de empleado no está registrado.";
+                return;
+            }
+
+            perfil = await respuesta.Content
+                .ReadFromJsonAsync<PerfilPermisoDto>();
+
+            if (perfil == null)
+            {
+                mensaje = "No fue posible cargar el perfil.";
+                return;
+            }
+
+            nuevoPermiso.NumeroEmpleado =
+                perfil.NumeroEmpleado;
+
+            await CargarPermisos();
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Error de conexión: {ex.Message}";
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+
+    private async Task CargarPermisos()
+    {
+        if (perfil == null)
+            return;
+
+        cargandoPermisos = true;
+
+        try
+        {
+
+            string url;
+
+            switch (perfil.Rol)
+            {
+                case "DirectorArea":
+
+                    url =
+                        $"{ApiBase}/area/{perfil.NumeroEmpleado}";
+
+                    break;
+
+
+                case "RRHH":
+
+                case "RRHHAdmin":
+
+                case "Admin":
+
+                    url =
+                        $"{ApiBase}/todos/{perfil.NumeroEmpleado}";
+
+                    break;
+
+
+                default:
+
+                    url =
+                        $"{ApiBase}/mis-permisos/{perfil.NumeroEmpleado}";
+
+                    break;
+            }
+
+
+            permisos =
+                await Http.GetFromJsonAsync<List<PermisoDto>>(url)
+                ?? new List<PermisoDto>();
+        }
+        catch (Exception ex)
+        {
+            mensaje =
+                $"Error al cargar permisos: {ex.Message}";
+
+            esExito = false;
+
+            permisos = new();
+        }
+        finally
+        {
+            cargandoPermisos = false;
+        }
+    }
+
+
+    private async Task SolicitarPermiso()
+    {
+        if (perfil == null)
+            return;
+
+        mensaje = "";
+
+        if (!horaInicio.HasValue)
+        {
+            mensaje = "Seleccione una hora de inicio.";
+            esExito = false;
+            return;
+        }
+
+        if (!horaFin.HasValue)
+        {
+            mensaje = "Seleccione una hora final.";
+            esExito = false;
+            return;
+        }
+
+        nuevoPermiso.NumeroEmpleado =
+            perfil.NumeroEmpleado;
+
+        nuevoPermiso.Fecha =
+            DateOnly.FromDateTime(fechaPermiso);
+
+        nuevoPermiso.HoraInicio =
+            horaInicio.Value;
+
+        nuevoPermiso.HoraFin =
+            horaFin.Value;
+
+        procesando = true;
+
+        try
+        {
+
+            var respuesta =
+                await Http.PostAsJsonAsync(
+                    ApiBase,
+                    nuevoPermiso);
+            if (respuesta.IsSuccessStatusCode)
+            {
+                mensaje = "Permiso solicitado correctamente.";
+                esExito = true;
+
+                nuevoPermiso.Motivo = "";
+
+                await CargarPermisos();
+            }
+            else
+            {
+                var error =
+                    await respuesta.Content.ReadAsStringAsync();
+
+                mensaje = ObtenerMensajeApi(error);
+                esExito = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Error de conexión: {ex.Message}";
+            esExito = false;
+        }
+        finally
+        {
+            procesando = false;
+        }
+    }
+
+
+    private async Task CambiarEstado(
+        int id,
+        bool autorizar)
+    {
+        if (perfil == null)
+            return;
+
+        procesando = true;
+        mensaje = "";
+
+        try
+        {
+
+            var dto =
+                new CambiarEstadoPermisoDto
+                {
+                    NumeroEmpleadoAutoriza =
+                        perfil.NumeroEmpleado
+                };
+
+
+            string accion =
+                autorizar
+                    ? "autorizar"
+                    : "rechazar";
+
+
+            var respuesta =
+                await Http.PutAsJsonAsync(
+                    $"{ApiBase}/{id}/{accion}",
+                    dto);
+
+
+            if (respuesta.IsSuccessStatusCode)
+            {
+                mensaje =
+                    autorizar
+                        ? "Permiso autorizado correctamente."
+                        : "Permiso rechazado correctamente.";
+
+                esExito = true;
+
+                await CargarPermisos();
+            }
+            else
+            {
+                mensaje =
+                    ObtenerMensajeApi(
+                        await respuesta.Content.ReadAsStringAsync());
+
+                esExito = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje =
+                $"Error de conexión: {ex.Message}";
+
+            esExito = false;
+        }
+        finally
+        {
+            procesando = false;
+        }
+    }
+
+
+    private async Task CancelarPermiso(int id)
+    {
+        if (perfil == null)
+            return;
+
+        procesando = true;
+        mensaje = "";
+
+        try
+        {
+
+            var respuesta =
+                await Http.PutAsync(
+                    $"{ApiBase}/{id}/cancelar/{perfil.NumeroEmpleado}",
+                    null);
+
+
+            if (respuesta.IsSuccessStatusCode)
+            {
+                mensaje =
+                    "Permiso cancelado correctamente.";
+
+                esExito = true;
+
+                await CargarPermisos();
+            }
+            else
+            {
+                mensaje =
+                    ObtenerMensajeApi(
+                        await respuesta.Content.ReadAsStringAsync());
+
+                esExito = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje =
+                $"Error de conexión: {ex.Message}";
+
+            esExito = false;
+        }
+        finally
+        {
+            procesando = false;
+        }
+    }
+
+
+    private string ClaseEstado(string estado)
+    {
+        return estado switch
+        {
+            "Autorizado" => "bg-success",
+            "Rechazado" => "bg-danger",
+            "Cancelado" => "bg-secondary",
+            _ => "bg-warning text-dark"
+        };
+    }
+
+
+    private string ObtenerMensajeApi(string json)
+    {
+        try
+        {
+            using var documento =
+                System.Text.Json.JsonDocument.Parse(json);
+
+            if (documento.RootElement.TryGetProperty(
+                    "Mensaje",
+                    out var propiedad))
+            {
+                return propiedad.GetString()
+                       ?? "Ocurrió un error.";
+            }
+
+            if (documento.RootElement.TryGetProperty(
+                    "mensaje",
+                    out propiedad))
+            {
+                return propiedad.GetString()
+                       ?? "Ocurrió un error.";
+            }
+        }
+        catch
+        {
+        }
+
+        return "No fue posible realizar la operación.";
+    }
+
+
+    private void CerrarSesion()
+    {
+        perfil = null;
+
+        permisos.Clear();
+
+        numeroEmpleado = "";
+
+        mensaje = "";
+
+        nuevoPermiso =
+            new CrearPermisoDto();
+
+        fechaPermiso = DateTime.Today;
+
+        horaInicio = new TimeOnly(8, 0);
+
+        horaFin = new TimeOnly(10, 0);
+    }
+}

@@ -11,17 +11,24 @@ namespace Checador.API.Data.Entities
 
         [Required]
         [MaxLength(100)]
-        public string NombreCompleto { get; set; }
+        public string NombreCompleto { get; set; } = null!;
 
         [Required]
         [MaxLength(50)]
-        public string NumeroEmpleado { get; set; }
+        public string NumeroEmpleado { get; set; } = null!;
 
         [Required]
         [MaxLength(50)]
-        public string Puesto { get; set; }
+        public string Puesto { get; set; } = null!;
 
         [Required]
-        public string Huella { get; set; }
+        [MaxLength(30)]
+        public string Rol { get; set; } = "Admin";
+
+        
+        public string? Huella { get; set; }
+        // El campo se conserva para una futura integración con un lector biométrico.
+        // Actualmente NO es obligatorio ni se utiliza
+        // para autenticar al administrador.
     }
 }

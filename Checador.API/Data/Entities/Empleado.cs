@@ -14,18 +14,32 @@ namespace Checador.API.Data.Entities
         [Required]
         [Column("Nombre")]
         public string Nombre { get; set; } = null!;
+
         [Required]
         [Column("apellidoPa")]
         public string ApellidoPa { get; set; } = null!;
+
         [Column("apellidoMa")]
         public string ApellidoMa { get; set; } = null!;
+
         [Required]
         [Column("Puesto")]
         public string Puesto { get; set; } = null!;
+
         [Required]
         [Column("Departamento")]
         public string Departamento { get; set; } = null!;
+
+        [Required]
+        [Column("Rol")]
+        public string Rol { get; set; } = "Empleado";
+
         [JsonIgnore]
-        public ICollection<Asistencia> Asistencias { get; set; } = new List<Asistencia>();
+        public ICollection<Asistencia> Asistencias { get; set; }
+            = new List<Asistencia>();
+
+        [JsonIgnore]
+        public ICollection<Permiso> Permisos { get; set; }
+            = new List<Permiso>();
     }
 }

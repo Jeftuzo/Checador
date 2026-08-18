@@ -13,7 +13,7 @@ namespace Checador.API.Data.Dtos.AdminDto
         [Required(ErrorMessage = "El puesto es obligatorio")]
         public string Puesto { get; set; } = "";
 
-        [Required(ErrorMessage = "La huella es obligatoria")]
-        public string Huella { get; set; } = "";
+        // Mejora futura: autenticación mediante lector biométrico.
+        public string? Huella { get; set; }
     }
 }

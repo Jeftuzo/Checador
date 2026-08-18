@@ -1,6 +1,7 @@
 ﻿@page "/"
 @layout Checador.Web.Client.Layout.EmptyNavMenu
 @using Microsoft.AspNetCore.Components.Web
+@inject HttpClient Http
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
 @inject IJSRuntime JS
@@ -61,8 +62,11 @@ else if (requiereSetup)
                     }
                 </button>
 
-                <button type="button" class="btn btn-outline-secondary btn-sm w-100 mt-3" @click="ForzarRegistroManual" @onclick="ForzarRegistroManual">
-                    <i class="bi bi-shield-exclamation"></i> Omitir lectura de huella y registrar por sistema
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm w-100 mt-3"
+                        @onclick="ForzarRegistroManual">
+                    <i class="bi bi-tools"></i>
+                    Crear administrador predeterminado
                 </button>
 
                 @if (!string.IsNullOrEmpty(mensajeSetup))
@@ -75,66 +79,149 @@ else if (requiereSetup)
 }
 else
 {
-    <div class="container-fluid vh-100 p-0">
+    <div class="container-fluid vh-100 p-0 position-relative">
+
+        @* BOTÓN PARA REGRESAR AL MENÚ PRINCIPAL *@
+        <div class="position-absolute top-0 end-0 m-3"
+             style="z-index: 1000;">
+            <a href="/menu"
+               class="btn btn-light fw-bold shadow-sm">
+                <i class="bi bi-grid"></i>
+                Menú Principal
+            </a>
+        </div>
+
         <div class="row g-0 h-100">
-            <div class="col-md-6 split-left text-center" style="background-color: #960E53; color: white; display: flex; flex-direction: column; justify-content: space-between; padding: 40px;">
+
+            <div class="col-md-6 split-left text-center"
+                 style="background-color: #960E53; color: white; display: flex; flex-direction: column; justify-content: space-between; padding: 40px;">
+
                 <div style="margin-top: 20px;">
-                    <img src="Images/direccion-general-del-registro-civil.png" alt="Gobierno de Sonora" width="200" />
+                    <img src="Images/direccion-general-del-registro-civil.png"
+                         alt="Gobierno de Sonora"
+                         width="200" />
                 </div>
+
                 <div>
                     <h2 class="fw-bold mb-4">Registro Civil</h2>
-                    <p class="px-5" style="font-size: 1.1rem; line-height: 1.6;">
+
+                    <p class="px-5"
+                       style="font-size: 1.1rem; line-height: 1.6;">
                         Sistema de asistencia. Ingresa tu número de empleado y colócate frente a la cámara para registrar tu entrada o salida.
                     </p>
                 </div>
-                <div class="d-flex align-items-center justify-content-center text-start" style="margin-bottom: 20px;">
-                    <img src="Images/logo-sonora.png" class="me-3" width="100" />
+
+                <div class="d-flex align-items-center justify-content-center text-start"
+                     style="margin-bottom: 20px;">
+
+                    <img src="Images/logo-sonora.png"
+                         class="me-3"
+                         width="100" />
+
                     <div style="font-size: 0.85rem; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 15px;">
-                        <strong>Dirección General de Registro Civil</strong> Centro de Gobierno<br />
-                        Edificio Sonora Sur Planta Baja, Blvd. Paseo Río Sonora y Comonfort, C.P. 83280<br />
+                        <strong>Dirección General de Registro Civil</strong>
+                        Centro de Gobierno<br />
+
+                        Edificio Sonora Sur Planta Baja,
+                        Blvd. Paseo Río Sonora y Comonfort,
+                        C.P. 83280<br />
+
                         Hermosillo, Sonora, México.
                     </div>
+
                 </div>
             </div>
 
             <div class="col-md-6 d-flex align-items-center justify-content-center bg-white">
+
                 <div class="w-75 p-4">
-                    <h3 class="mb-4 text-center fw-bold" style="color: #333333;">Registrar Asistencia</h3>
-                    <div class="video-container mb-4 shadow-sm" style="background-color: #000; border-radius: 8px; overflow: hidden; height: 300px;">
-                        <video id="videoFeed" width="100%" height="300" autoplay muted playsinline></video>
-                        <canvas id="canvasOculto" width="400" height="300" style="display:none;"></canvas>
+
+                    <h3 class="mb-4 text-center fw-bold"
+                        style="color: #333333;">
+                        Registrar Asistencia
+                    </h3>
+
+                    <div class="video-container mb-4 shadow-sm"
+                         style="background-color: #000; border-radius: 8px; overflow: hidden; height: 300px;">
+
+                        <video id="videoFeed"
+                               style="width: 100%;"
+                               height="300"
+                               autoplay
+                               muted
+                               playsinline>
+                        </video>
+
+                        <canvas id="canvasOculto"
+                                width="400"
+                                height="300"
+                                style="display:none;">
+                        </canvas>
                     </div>
 
-                    <EditForm Model="@registro" OnValidSubmit="ProcesarRegistro">
+                    <EditForm Model="@registro"
+                              OnValidSubmit="ProcesarRegistro">
+
                         <DataAnnotationsValidator />
+
                         <div class="form-group mb-4 text-start">
-                            <label for="numeroEmpleado" class="form-label fw-bold" style="color: #4D4D4D;">Número de Empleado</label>
-                            <input type="text" id="numeroEmpleado" class="form-control form-control-lg text-center fw-bold"
-                                   placeholder="Ingresa tu número de empleado y presiona Enter" @bind-value="registro.NumeroEmpleado"
-                                   @ref="inputNumeroEmpleado" autofocus />
-                            <ValidationMessage For="@(() => registro.NumeroEmpleado)" class="text-danger small" />
+
+                            <label for="numeroEmpleado"
+                                   class="form-label fw-bold"
+                                   style="color: #4D4D4D;">
+                                Número de Empleado
+                            </label>
+
+                            <input type="text"
+                                   id="numeroEmpleado"
+                                   class="form-control form-control-lg text-center fw-bold"
+                                   placeholder="Ingresa tu número de empleado y presiona Enter"
+                                   @bind-value="registro.NumeroEmpleado"
+                                   @ref="inputNumeroEmpleado"
+                                   autofocus />
+
+                            <ValidationMessage For="@(() => registro.NumeroEmpleado)"
+                                               class="text-danger small" />
+
                         </div>
-                        <button type="submit" class="btn btn-lg w-100 py-3 fw-bold fs-5 shadow-sm" style="background-color: #960E53; color: white; border: none;" disabled="@procesando">
+
+                        <button type="submit"
+                                class="btn btn-lg w-100 py-3 fw-bold fs-5 shadow-sm"
+                                style="background-color: #960E53; color: white; border: none;"
+                                disabled="@procesando">
+
                             @if (procesando)
                             {
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span class="spinner-border spinner-border-sm"
+                                      role="status"
+                                      aria-hidden="true">
+                                </span>
+
                                 <span> Procesando...</span>
                             }
                             else
                             {
-                                <span><i class="bi bi-person-check-fill"></i> Registrar</span>
+                                <span>
+                                    <i class="bi bi-person-check-fill"></i>
+                                    Registrar
+                                </span>
                             }
+
                         </button>
+
                     </EditForm>
 
                     @if (!string.IsNullOrEmpty(mensajeResultado))
                     {
-                        <div class="alert @(esExito ? "alert-success" : "alert-danger") mt-4 fw-bold text-center" role="alert">
+                        <div class="alert @(esExito ? "alert-success" : "alert-danger") mt-4 fw-bold text-center"
+                             role="alert">
                             @mensajeResultado
                         </div>
                     }
+
                 </div>
             </div>
+
         </div>
     </div>
 }
@@ -161,18 +248,21 @@ else
     {
         try
         {
-            using var client = new HttpClient();
-            var respuesta = await client.GetAsync("https://localhost:7002/api/Admin/requiere-setup");
+            var respuesta = await Http.GetAsync(
+                "api/Admin/requiere-setup");
 
             if (respuesta.IsSuccessStatusCode)
             {
-                var boolString = await respuesta.Content.ReadAsStringAsync();
+                var boolString =
+                    await respuesta.Content.ReadAsStringAsync();
+
                 requiereSetup = bool.Parse(boolString);
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error al conectar con la API: " + ex.Message);
+            Console.WriteLine(
+                "Error al conectar con la API: " + ex.Message);
         }
         finally
         {
@@ -230,8 +320,8 @@ else
                 Huella = "BYPASS_SETUP_AUTOMATICO"
             };
 
-            using var client = new HttpClient();
-            var respuesta = await client.PostAsJsonAsync("https://localhost:7002/api/Admin/registrar-inicial", adminDefault);
+          
+            var respuesta = await Http.PostAsJsonAsync("api/Admin/registrar-inicial",adminDefault);
 
             if (respuesta.IsSuccessStatusCode)
             {
@@ -259,67 +349,142 @@ else
 
         try
         {
-            string fotoBase64 = await JS.InvokeAsync<string>("capturaAutomatica", "videoFeed", "canvasOculto");
+            string fotoBase64 = await JS.InvokeAsync<string>(
+                "capturaAutomatica",
+                "videoFeed",
+                "canvasOculto");
 
-            if (string.IsNullOrEmpty(fotoBase64) || fotoBase64.Contains("data:,"))
+            if (string.IsNullOrEmpty(fotoBase64) ||
+                fotoBase64.Contains("data:,"))
             {
                 esExito = false;
-                mensajeResultado = "Error: La cámara no pudo capturar la imagen.";
-                procesando = false;
+                mensajeResultado =
+                    "Error: La cámara no pudo capturar la imagen.";
                 return;
             }
 
             registro.Foto = fotoBase64;
 
-            using var client = new HttpClient();
-            var respuesta = await client.PostAsJsonAsync("https://localhost:7002/api/Asistencia/registrar", registro);
+            // Primera petición
+            registro.ConfirmarSalidaAnticipada = false;
 
-            var opcionesJson = new System.Text.Json.JsonSerializerOptions
+           
+
+            var respuesta = await Http.PostAsJsonAsync("api/Asistencia/registrar",registro);
+
+            var opcionesJson =
+                new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+
+            var resultado =
+                await respuesta.Content.ReadFromJsonAsync<RespuestaApi>(
+                    opcionesJson);
+
+            // NECESITA CONFIRMACIÓN DE SALIDA ANTICIPADA
+            if (resultado?.RequiereConfirmacion == true)
             {
-                PropertyNameCaseInsensitive = true
-            };
+                bool confirmar = await JS.InvokeAsync<bool>(
+                    "confirm",
+                    resultado.Mensaje);
 
+                if (!confirmar)
+                {
+                    esExito = false;
+                    mensajeResultado =
+                        "Registro de salida cancelado.";
+
+                    return;
+                }
+
+                // Usuario confirmó
+                registro.ConfirmarSalidaAnticipada = true;
+
+                var segundaRespuesta =
+                    await Http.PostAsJsonAsync("api/Asistencia/registrar", registro);
+
+                var resultadoConfirmado =
+                    await segundaRespuesta.Content
+                        .ReadFromJsonAsync<RespuestaApi>(
+                            opcionesJson);
+
+                if (segundaRespuesta.IsSuccessStatusCode)
+                {
+                    esExito = true;
+
+                    mensajeResultado =
+                        resultadoConfirmado?.Mensaje ??
+                        "Salida registrada correctamente.";
+                }
+                else
+                {
+                    esExito = false;
+
+                    mensajeResultado =
+                        resultadoConfirmado?.Mensaje ??
+                        "No fue posible registrar la salida.";
+                }
+
+                return;
+            }
+
+            // REGISTRO NORMAL
             if (respuesta.IsSuccessStatusCode)
             {
-                var resultadoOk = await respuesta.Content.ReadFromJsonAsync<RespuestaApi>(opcionesJson);
-                esExito = true;
-                mensajeResultado = resultadoOk?.Mensaje ?? "Operación exitosa.";
+                esExito = resultado?.Exito ?? true;
+
+                mensajeResultado =
+                    resultado?.Mensaje ??
+                    "Registro realizado correctamente.";
             }
             else
             {
-                var errorTexto = await respuesta.Content.ReadFromJsonAsync<RespuestaApi>(opcionesJson);
                 esExito = false;
-                mensajeResultado = errorTexto?.Mensaje ?? "El número de empleado que registró no existe.";
+
+                mensajeResultado =
+                    resultado?.Mensaje ??
+                    "No fue posible registrar la asistencia.";
             }
         }
         catch (Exception ex)
         {
             esExito = false;
-            mensajeResultado = $"Error de conexión: {ex.Message}";
+
+            mensajeResultado =
+                $"Error de conexión: {ex.Message}";
         }
         finally
         {
             procesando = false;
+
+            // Siempre dejar la confirmación nuevamente en false
+            registro.ConfirmarSalidaAnticipada = false;
+
+            // Limpiar número de empleado
             registro.NumeroEmpleado = "";
+
+            await Task.Delay(100);
+
             await inputNumeroEmpleado.FocusAsync();
         }
     }
 
     private async Task RegistrarPrimerAdmin()
     {
-        if (string.IsNullOrEmpty(nuevoAdmin.Huella))
-        {
-            mensajeSetup = "Por favor, coloque su dedo en el lector o use el botón de registro manual.";
-            return;
-        }
+        // if (string.IsNullOrEmpty(nuevoAdmin.Huella))
+        // {
+        //     mensajeSetup = "Por favor, coloque su dedo en el lector o use el botón de registro manual.";
+        //     return;
+        // }
 
         procesando = true;
         mensajeSetup = "";
 
         try
         {
-            using var client = new HttpClient();
-            var respuesta = await client.PostAsJsonAsync("https://localhost:7002/api/Admin/registrar-inicial", nuevoAdmin);
+            
+            var respuesta = await Http.PostAsJsonAsync("api/Admin/registrar-inicial",nuevoAdmin);
 
             if (respuesta.IsSuccessStatusCode)
             {
@@ -342,6 +507,10 @@ else
 
     public class RespuestaApi
     {
+        public bool Exito { get; set; }
+
+        public bool RequiereConfirmacion { get; set; }
+
         public string Mensaje { get; set; } = "";
     }
 }

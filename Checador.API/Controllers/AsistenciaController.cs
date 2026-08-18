@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Checador.API.Controllers
 {
-
     [ApiController]
     [Route("api/[controller]")]
     public class AsistenciaController : ControllerBase
@@ -17,41 +16,90 @@ namespace Checador.API.Controllers
         }
 
         [HttpPost("registrar")]
-        public async Task<IActionResult> RegistrarAsistencia([FromBody] RegistroDto request)
+        public async Task<IActionResult> RegistrarAsistencia(
+            [FromBody] RegistroDto request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var (exito, mensaje) = await _asistenciaService.RegistrarAsistenciaAsync(request.NumeroEmpleado, request.Foto);
+            var resultado = await _asistenciaService
+                .RegistrarAsistenciaAsync(
+                    request.NumeroEmpleado,
+                    request.Foto,
+                    request.ConfirmarSalidaAnticipada
+                );
 
-            var respuestaJson = new RespuestaDto { Mensaje = mensaje };
-
-            if (!exito)
+            if (resultado.RequiereConfirmacion)
             {
-                return BadRequest(respuestaJson); 
+                return Ok(new
+                {
+                    Exito = false,
+                    RequiereConfirmacion = true,
+                    Mensaje = resultado.mensaje
+                });
             }
 
-            return Ok(respuestaJson); 
+            if (!resultado.Exito)
+            {
+                return BadRequest(new
+                {
+                    Exito = false,
+                    RequiereConfirmacion = false,
+                    Mensaje = resultado.mensaje
+                });
+            }
+
+            return Ok(new
+            {
+                Exito = true,
+                RequiereConfirmacion = false,
+                Mensaje = resultado.mensaje
+            });
         }
 
         [HttpGet("reporte")]
-        public async Task<ActionResult<List<ReporteAsistenciaDto>>> GetReporte([FromQuery] string tipo = "dia")
+        public async Task<IActionResult> GetReporte(
+            [FromQuery] string tipo = "dia",
+            [FromQuery] string numeroSolicitante = "")
         {
             try
             {
-                if (string.IsNullOrEmpty(tipo))
+                if (string.IsNullOrWhiteSpace(numeroSolicitante))
+                {
+                    return BadRequest(new
+                    {
+                        Mensaje = "Debe indicar el número del usuario solicitante."
+                    });
+                }
+
+                if (string.IsNullOrWhiteSpace(tipo))
                 {
                     tipo = "dia";
                 }
 
-                var reporte = await _asistenciaService.ObtenerReporteAsync(tipo.ToLower());
-                return Ok(reporte);
+                var resultado = await _asistenciaService
+                    .ObtenerReportePorRolAsync(
+                        tipo.ToLower(),
+                        numeroSolicitante);
+
+                if (!resultado.Exito)
+                {
+                    return StatusCode(403, new
+                    {
+                        Mensaje = resultado.Mensaje
+                    });
+                }
+
+                return Ok(resultado.Reporte);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error interno al generar el reporte: {ex.Message}");
+                return StatusCode(500, new
+                {
+                    Mensaje = $"Error interno al generar el reporte: {ex.Message}"
+                });
             }
         }
     }
