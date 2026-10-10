@@ -17,6 +17,8 @@ namespace Checador.Web.Client
                 BaseAddress = new Uri(apiBaseUrl)
             });
 
+            builder.Services.AddScoped<Checador.Web.Client.Services.AuthState>();
+
             await builder.Build().RunAsync();
         }
     }

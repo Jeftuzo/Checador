@@ -45,7 +45,6 @@ namespace Checador.API.Services
                 .FirstOrDefaultAsync();
 
 
-            // REGISTRAR ENTRADA
             if (asistencia == null)
             {
                 var nuevaAsistencia = new Asistencia
@@ -77,14 +76,12 @@ namespace Checador.API.Services
               );
             }
 
-            // REGISTRAR SALIDA
             var horaActual = TimeOnly.FromDateTime(ahora);
             var horaSalidaNormal = new TimeOnly(15, 0);
 
             bool salidaAnticipada = false;
             string mensajeConfirmacion = "";
 
-            // Buscar permiso autorizado para hoy
             var permisoAutorizado = await _context.Permisos
                 .Where(p =>
                     p.NumeroEmpleado == numeroEmpleado &&
@@ -95,7 +92,6 @@ namespace Checador.API.Services
 
             if (permisoAutorizado != null)
             {
-                // Si intenta salir antes del inicio autorizado del permiso
                 if (horaActual < permisoAutorizado.HoraInicio)
                 {
                     salidaAnticipada = true;
@@ -110,7 +106,6 @@ namespace Checador.API.Services
             }
             else
             {
-                // No tiene permiso, se usa la salida normal de las 3:00 PM
                 if (horaActual < horaSalidaNormal)
                 {
                     salidaAnticipada = true;
@@ -256,12 +251,12 @@ namespace Checador.API.Services
 
                         Puesto = empleado?.Puesto ?? "Sin Puesto",
 
+                        Departamento = empleado?.Departamento ?? "Sin Departamento",
+
                         DetalleTiempo =
                             $"{horas} hrs {minutos} mins " +
                             $"({g.Count()} registros)",
 
-                        // Por ahora el reporte mostrará
-                        // la fotografía de entrada más reciente.
                         FotoEntradaBase64 =
                             ultimoRegistro.FotoEntrada ?? string.Empty,
 
@@ -273,16 +268,12 @@ namespace Checador.API.Services
 
             return reporteAgrupado;
         }
-        public async Task<(
-    bool Exito,
-    string Mensaje,
-    List<ReporteAsistenciaDto> Reporte)>
-    ObtenerReportePorRolAsync(
-        string tipo,
-        string numeroSolicitante)
+
+
+        public async Task<(bool Exito, string Mensaje, List<ReporteAsistenciaDto>Reporte)>ObtenerReportePorRolAsync(string tipo, string numeroSolicitante)
         {
 
-            // BUSCAR COMO EMPLEADO
+
             var empleadoSolicitante = await _context.Empleados
                 .FirstOrDefaultAsync(e =>
                     e.NumeroEmpleado == numeroSolicitante);
@@ -290,7 +281,6 @@ namespace Checador.API.Services
             if (empleadoSolicitante != null)
             {
 
-                // DIRECTOR DE ÁREA
                 if (empleadoSolicitante.Rol == "DirectorArea")
                 {
                     var reporteCompleto =
@@ -315,7 +305,6 @@ namespace Checador.API.Services
                     );
                 }
 
-                // RRHH
                 if (empleadoSolicitante.Rol == "RRHH")
                 {
                     var reporte =
@@ -329,7 +318,6 @@ namespace Checador.API.Services
                 }
 
 
-                // RRHH ADMIN
                 if (empleadoSolicitante.Rol == "RRHHAdmin")
                 {
                     var reporte =
@@ -342,7 +330,6 @@ namespace Checador.API.Services
                     );
                 }
 
-                // EMPLEADO NORMAL
                 return (
                     false,
                     "El empleado no tiene permisos para consultar reportes.",
@@ -350,7 +337,6 @@ namespace Checador.API.Services
                 );
             }
 
-            // BUSCAR COMO ADMIN
             var administrador = await _context.Administradores
                 .FirstOrDefaultAsync(a =>
                     a.NumeroEmpleado == numeroSolicitante);
@@ -369,13 +355,28 @@ namespace Checador.API.Services
             }
 
 
-            // USUARIO NO EXISTE
             return (
                 false,
                 "El usuario no existe o no tiene permisos para consultar reportes.",
                 new List<ReporteAsistenciaDto>()
             );
         }
-    }
 
+        public async Task<(string FotoEntrada, string FotoSalida)> ObtenerFotosPorFechaAsync(string numeroEmpleado, DateTime fecha)
+        {
+            var registro = await _context.Asistencias
+                .Where(a => a.NumeroEmpleado == numeroEmpleado &&
+                            a.HoraEntrada.HasValue &&
+                            a.HoraEntrada.Value.Date == fecha.Date)
+                .OrderByDescending(a => a.HoraEntrada)
+                .FirstOrDefaultAsync();
+
+            if (registro != null)
+            {
+                return (registro.FotoEntrada ?? string.Empty, registro.FotoSalida ?? string.Empty);
+            }
+
+            return (string.Empty, string.Empty);
+        }
+    }
 }

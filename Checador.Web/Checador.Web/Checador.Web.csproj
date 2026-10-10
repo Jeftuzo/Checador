@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\Images\direccion-general-del-registro-civil.png" />
-    <None Include="wwwroot\Images\logo-sonora.png" />
+    <None Include="wwwroot\Images\Privadas\direccion-general-del-registro-civil.png" />
+    <None Include="wwwroot\Images\Privadas\logo-sonora.png" />
   </ItemGroup>
 	<Target Name="Limpieza" BeforeTargets="BeforeBuild">
 		<CallTarget Targets="Clean" />

@@ -361,3 +361,10 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Ignorar imágenes institucionales privadas
+Checador.Web/wwwroot/Images/Privadas/
+
+# Ignorar configuraciones locales (Textos reales)
+Checador.Web/wwwroot/appsettings.Development.json
+Checador.Web.Client/wwwroot/appsettings.Development.json

@@ -25,10 +25,11 @@ namespace Checador.API.Data.Entities
         [MaxLength(30)]
         public string Rol { get; set; } = "Admin";
 
-        
+        [Column("PasswordHash")]
+        public string? PasswordHash { get; set; }
+
+
+        //no se esta utilizando de momento, se mantiene para un futuro
         public string? Huella { get; set; }
-        // El campo se conserva para una futura integración con un lector biométrico.
-        // Actualmente NO es obligatorio ni se utiliza
-        // para autenticar al administrador.
     }
 }

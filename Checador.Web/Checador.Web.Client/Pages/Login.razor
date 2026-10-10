@@ -1,0 +1,98 @@
+﻿@page "/login"
+@layout Checador.Web.Client.Layout.EmptyNavMenu
+@using System.Net.Http.Json
+@using Checador.Web.Client.Dtos.AdminsDtos
+@using Checador.Web.Client.Dtos.PermisosDtos
+@inject HttpClient Http
+@inject NavigationManager NavManager
+@inject Checador.Web.Client.Services.AuthState Auth
+
+<div class="vh-100 d-flex justify-content-center align-items-center" style="background-color: #f4f6f9;">
+    <div class="card shadow-lg p-5" style="max-width: 450px; width: 100%; border-top: 5px solid #960E53;">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold mb-1" style="color: #960E53;">Acceso Administrativo</h2>
+            <p class="text-muted">Ingrese sus credenciales para continuar.</p>
+        </div>
+
+        <EditForm Model="modelo" OnValidSubmit="ProcesarLogin">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Número de Empleado</label>
+                <InputText @bind-Value="modelo.NumeroEmpleado" class="form-control form-control-lg text-center" placeholder="Número de Empleado" />
+                <ValidationMessage For="@(() => modelo.NumeroEmpleado)" class="text-danger small" />
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">Contraseña</label>
+                <InputText @bind-Value="modelo.Password" type="password" class="form-control form-control-lg text-center" placeholder="Contraseña" />
+                <ValidationMessage For="@(() => modelo.Password)" class="text-danger small" />
+            </div>
+
+            <button type="submit" class="btn btn-lg w-100 text-white fw-bold shadow-sm" style="background-color: #960E53;" disabled="@procesando">
+                @if (procesando)
+                {
+                    <span class="spinner-border spinner-border-sm"></span> <span> Verificando...</span>
+                }
+                else
+                {
+                    <span>Ingresar</span>
+                }
+            </button>
+
+            <a href="/menu" class="btn btn-outline-secondary w-100 mt-3">Volver al Menú Principal</a>
+
+            @if (!string.IsNullOrEmpty(mensajeError))
+            {
+                <div class="alert alert-danger mt-3 text-center">@mensajeError</div>
+            }
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private LoginRequestDto modelo = new();
+    private bool procesando = false;
+    private string mensajeError = "";
+
+    protected override void OnInitialized()
+    {
+        if (Auth.EstaAutenticado)
+        {
+            NavManager.NavigateTo("/admin-index");
+        }
+    }
+
+    private async Task ProcesarLogin()
+    {
+        procesando = true;
+        mensajeError = "";
+
+        try
+        {
+            var respuesta = await Http.PostAsJsonAsync("api/Auth/login", modelo);
+
+            if (respuesta.IsSuccessStatusCode)
+            {
+                var perfil = await respuesta.Content.ReadFromJsonAsync<PerfilPermisoDto>();
+                if (perfil != null)
+                {
+                    Auth.IniciarSesion(perfil);
+                    NavManager.NavigateTo("/admin-index");
+                }
+            }
+            else
+            {
+                mensajeError = "Credenciales incorrectas o sin privilegios.";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensajeError = "Error de conexión con el servidor.";
+        }
+        finally
+        {
+            procesando = false;
+        }
+    }
+}

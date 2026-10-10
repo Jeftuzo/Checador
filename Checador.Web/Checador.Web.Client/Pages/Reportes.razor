@@ -2,147 +2,80 @@
 @layout Checador.Web.Client.Layout.EmptyNavMenu
 @using System.Net.Http.Json
 @inject HttpClient Http
+@inject NavigationManager NavManager
+@inject Checador.Web.Client.Services.AuthState Auth
 @using Checador.Web.Client.Dtos
 @using Checador.Web.Client.Dtos.PermisosDtos
 
-<div class="container-fluid p-0" style="min-height: 100vh;">
-    <div class="row g-0" style="min-height: 100vh;">
+@if (!Auth.EstaAutenticado)
+{
+    <div class="p-5 text-center">Redirigiendo al login...</div>
+}
+else
+{
+    <div class="container-fluid p-0" style="min-height: 100vh;">
+        <div class="row g-0" style="min-height: 100vh;">
 
-      
-        <div class="col-lg-5">
-            <PanelInstitucional Texto="Consulta los registros de asistencia, horas trabajadas y evidencias de entrada y salida." />
-        </div>
+            <div class="col-lg-5">
+                <PanelInstitucional Texto="Consulta los registros de asistencia, horas trabajadas y evidencias de entrada y salida." />
+            </div>
 
-        
-        <div class="col-lg-7"
-             style="background-color: #f4f6f9;">
-
-            <div class="container-fluid py-4" style="background-color: #f4f6f9; min-height: 100vh;">
-                <div class="card shadow-lg p-4 border-0">
-                    <div class="d-flex justify-content-end mb-3">
-                        <a href="/menu"
-                           class="btn btn-outline-secondary fw-bold">
-                            <i class="bi bi-grid"></i>
-                            Menú Principal
-                        </a>
-                    </div>
-                    @if (perfil == null)
-                    {
-                        <div class="row justify-content-center py-5">
-                            <div class="col-md-6 col-lg-5">
-
-                                <div class="card border-0 shadow-sm p-4">
-
-                                    <h4 class="fw-bold text-center mb-3"
-                                        style="color: #960E53;">
-                                        Acceso a Reportes
-                                    </h4>
-
-                                    <p class="text-muted text-center">
-                                        Ingrese su número de empleado para continuar.
-                                    </p>
-
-                                    <label class="form-label fw-bold">
-                                        Número de Empleado
-                                    </label>
-
-                                    <input type="text"
-                                           class="form-control form-control-lg mb-3 text-center"
-                                           @bind="numeroSolicitante"
-                                           placeholder="Ej. D001" />
-
-                                    <button class="btn btn-lg w-100 text-white fw-bold"
-                                            style="background-color: #960E53;"
-                                            disabled="@verificandoAcceso"
-                                            @onclick="VerificarAcceso">
-
-                                        @if (verificandoAcceso)
-                                        {
-                                            <span class="spinner-border spinner-border-sm"></span>
-                                            <span> Verificando...</span>
-                                        }
-                                        else
-                                        {
-                                            <span>Ingresar</span>
-                                        }
-
-                                    </button>
-
-                                    @if (!string.IsNullOrEmpty(mensajeAcceso))
-                                    {
-                                        <div class="alert alert-danger mt-3 text-center">
-                                            @mensajeAcceso
-                                        </div>
-                                    }
-
-                                </div>
-
-                            </div>
+            <div class="col-lg-7" style="background-color: #f4f6f9;">
+                <div class="container-fluid py-4" style="background-color: #f4f6f9; min-height: 100vh;">
+                    <div class="card shadow-lg p-4 border-0">
+                        <div class="d-flex justify-content-end mb-3">
+                            <a href="/admin-index" class="btn btn-outline-secondary fw-bold">
+                                <i class="bi bi-shield-lock"></i>
+                                Panel Administrativo
+                            </a>
                         </div>
-                    }
-                    else
-                    {
+
                         <div class="alert alert-light border shadow-sm mb-4">
                             <div class="d-flex justify-content-between align-items-center">
-
                                 <div>
-                                    <strong>@perfil.NombreCompleto</strong>
-
-                                    <span class="badge ms-2"
-                                          style="background-color: #960E53;">
-                                        @perfil.Rol
+                                    <strong>@Auth.PerfilActual!.NombreCompleto</strong>
+                                    <span class="badge ms-2" style="background-color: #960E53;">
+                                        @Auth.PerfilActual.Rol
                                     </span>
-
                                     <div class="text-muted small mt-1">
-                                        @perfil.NumeroEmpleado - @perfil.Departamento
+                                        @Auth.PerfilActual.NumeroEmpleado - @Auth.PerfilActual.Departamento
                                     </div>
                                 </div>
-
-                                <button class="btn btn-sm btn-outline-secondary"
-                                        @onclick="CerrarAcceso">
-                                    Cambiar usuario
-                                </button>
-
                             </div>
                         </div>
+
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
                                 <h2 class="fw-bold mb-1" style="color: #960E53;">Reportes</h2>
                             </div>
-
                         </div>
 
-                        <div class="row align-items-center mb-4 g-3">
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold text-secondary">Filtrar por Empleado (Número o Nombre)</label>
-                                <input type="text" class="form-control" placeholder="Escribe para filtrar..." @bind="filtroEmpleado" @bind:event="oninput" />
+                        <div class="row align-items-end mb-4 g-3">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-secondary">Empleado</label>
+                                <input type="text" class="form-control" placeholder="Número o nombre..." @bind="filtroEmpleado" @bind:event="oninput" />
                             </div>
 
-                            <div class="col-md-8 text-md-end">
+                            @if (PuedeFiltrarArea)
+                            {
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold text-secondary">Departamento</label>
+                                    <select class="form-select" @bind="filtroDepartamento">
+                                        <option value="">Todos</option>
+                                        @foreach (var depto in DepartamentosDisponibles)
+                                        {
+                                            <option value="@depto">@depto</option>
+                                        }
+                                    </select>
+                                </div>
+                            }
+
+                            <div class="@(PuedeFiltrarArea ? "col-md-6" : "col-md-9") text-md-end">
                                 <div class="btn-group" role="group">
-                                    <button type="button"
-                                            class="btn @(vistaActual == "dia" ? "btn-dark text-white" : "btn-outline-dark")"
-                                            @onclick='() => CambiarVista("dia")'>
-                                        Día
-                                    </button>
-
-                                    <button type="button"
-                                            class="btn @(vistaActual == "semana" ? "btn-dark text-white" : "btn-outline-dark")"
-                                            @onclick='() => CambiarVista("semana")'>
-                                        Semana
-                                    </button>
-
-                                    <button type="button"
-                                            class="btn @(vistaActual == "mes" ? "btn-dark text-white" : "btn-outline-dark")"
-                                            @onclick='() => CambiarVista("mes")'>
-                                        Mes
-                                    </button>
-
-                                    <button type="button"
-                                            class="btn @(vistaActual == "ultimos30" ? "btn-dark text-white" : "btn-outline-dark")"
-                                            @onclick='() => CambiarVista("ultimos30")'>
-                                        Últimos 30 Días
-                                    </button>
+                                    <button type="button" class="btn @(vistaActual == "dia" ? "btn-dark text-white" : "btn-outline-dark")" @onclick='() => CambiarVista("dia")'>Día</button>
+                                    <button type="button" class="btn @(vistaActual == "semana" ? "btn-dark text-white" : "btn-outline-dark")" @onclick='() => CambiarVista("semana")'>Semana</button>
+                                    <button type="button" class="btn @(vistaActual == "mes" ? "btn-dark text-white" : "btn-outline-dark")" @onclick='() => CambiarVista("mes")'>Mes</button>
+                                    <button type="button" class="btn @(vistaActual == "ultimos30" ? "btn-dark text-white" : "btn-outline-dark")" @onclick='() => CambiarVista("ultimos30")'>Últimos 30 Días</button>
                                 </div>
                                 <button class="btn btn-success ms-2 fw-bold" @onclick="CargarReportes">
                                     <i class="bi bi-arrow-clockwise"></i> Actualizar
@@ -165,10 +98,10 @@
                                         <tr>
                                             <th class="py-3">No. Empleado</th>
                                             <th class="py-3">Nombre Completo</th>
+                                            <th class="py-3">Departamento</th>
                                             <th class="py-3">Puesto</th>
                                             <th class="py-3">Horas / Registros (@vistaActual.ToUpper())</th>
-                                            <th class="py-3 text-center">Foto Entrada</th>
-                                            <th class="py-3 text-center">Foto Salida</th>
+                                            <th class="py-3 text-center">Evidencias</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -179,38 +112,13 @@
                                                 <tr>
                                                     <td><strong>@item.NumeroEmpleado</strong></td>
                                                     <td>@item.NombreCompleto</td>
+                                                    <td>@item.Departamento</td>
                                                     <td><span class="badge bg-light text-dark border">@item.Puesto</span></td>
-                                                    <td>
-                                                        <span class="fw-bold text-primary">@item.DetalleTiempo</span>
-                                                    </td>
+                                                    <td><span class="fw-bold text-primary">@item.DetalleTiempo</span></td>
                                                     <td class="text-center">
-                                                        @if (!string.IsNullOrEmpty(item.FotoEntradaBase64))
-                                                        {
-                                                            <button class="btn btn-sm btn-outline-success fw-bold"
-                                                                    @onclick='() => MostrarFoto(item.FotoEntradaBase64, "Entrada")'>
-                                                                <i class="bi bi-box-arrow-in-right"></i>
-                                                                Ver Entrada
-                                                            </button>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="text-muted small">Sin foto</span>
-                                                        }
-                                                    </td>
-
-                                                    <td class="text-center">
-                                                        @if (!string.IsNullOrEmpty(item.FotoSalidaBase64))
-                                                        {
-                                                            <button class="btn btn-sm btn-outline-danger fw-bold"
-                                                                    @onclick='() => MostrarFoto(item.FotoSalidaBase64, "Salida")'>
-                                                                <i class="bi bi-box-arrow-right"></i>
-                                                                Ver Salida
-                                                            </button>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="text-muted small">Sin foto</span>
-                                                        }
+                                                        <button class="btn btn-sm btn-outline-primary fw-bold" @onclick='() => AbrirModalFotos(item.NumeroEmpleado, item.NombreCompleto)'>
+                                                            <i class="bi bi-images"></i> Ver Fotos
+                                                        </button>
                                                     </td>
                                                 </tr>
                                             }
@@ -219,8 +127,7 @@
                                         {
                                             <tr>
                                                 <td colspan="6" class="text-center text-muted py-5">
-                                                    <i class="bi bi-folder2-open fs-1 d-block mb-2"></i>
-                                                    No se encontraron registros de asistencia para este periodo o filtro.
+                                                    <i class="bi bi-folder2-open fs-1 d-block mb-2"></i> No se encontraron registros de asistencia.
                                                 </td>
                                             </tr>
                                         }
@@ -228,182 +135,153 @@
                                 </table>
                             </div>
                         }
-
-                    }
+                    </div>
                 </div>
-            </div>
 
-            @if (mostrarModalFoto)
-            {
-                <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content shadow-lg">
-                            <div class="modal-header" style="background-color: #960E53; color: white;">
-                                <h5 class="modal-title fw-bold">
-                                    Foto de @tipoFotoSeleccionada
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" @onclick="CerrarModal"></button>
-                            </div>
-                            <div class="modal-content-body text-center p-4">
-                                <img src="@fotoSeleccionada" class="img-fluid rounded shadow border" style="max-height: 400px;" alt="Foto de asistencia" />
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" @onclick="CerrarModal">Cerrar</button>
+                @if (mostrarModalFotos)
+                {
+                    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content shadow-lg">
+                                <div class="modal-header" style="background-color: #960E53; color: white;">
+                                    <h5 class="modal-title fw-bold">Evidencias de @empleadoSeleccionadoNombre</h5>
+                                    <button type="button" class="btn-close btn-close-white" @onclick="CerrarModalFotos"></button>
+                                </div>
+                                <div class="modal-body p-4">
+                                    <div class="mb-4 text-center bg-light p-3 rounded border">
+                                        <label class="form-label fw-bold text-secondary mb-2">Seleccione una fecha (Últimos 30 días):</label><br />
+                                        <input type="date" class="form-control d-inline-block w-auto shadow-sm" min="@DateTime.Today.AddDays(-30).ToString("yyyy-MM-dd")" max="@DateTime.Today.ToString("yyyy-MM-dd")" @bind="fechaSeleccionadaFotos" @bind:after="CargarFotosPorFecha" />
+                                    </div>
+                                    @if (cargandoFotos)
+                                    {
+                                        <div class="text-center py-5">
+                                            <div class="spinner-border text-primary" role="status"></div>
+                                            <div class="mt-2 text-muted fw-bold">Buscando evidencias fotográficas...</div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="row">
+                                            <div class="col-md-6 text-center mb-3">
+                                                <h6 class="fw-bold text-secondary mb-3">Registro de Entrada</h6>
+                                                @if (!string.IsNullOrEmpty(fotoEntradaActual))
+                                                {
+                                                    <img src="@fotoEntradaActual" class="img-fluid rounded shadow border" style="max-height: 280px;" alt="Entrada" />
+                                                }
+                                                else
+                                                {
+
+                                                    <div class="p-5 border rounded bg-white text-muted shadow-sm"><i class="bi bi-camera-video-off fs-1 d-block mb-2"></i>Sin registro</div>
+                                                }
+                                            </div>
+                                            <div class="col-md-6 text-center mb-3">
+                                                <h6 class="fw-bold text-secondary mb-3">Registro de Salida</h6>
+                                                @if (!string.IsNullOrEmpty(fotoSalidaActual))
+                                                {
+                                                    <img src="@fotoSalidaActual" class="img-fluid rounded shadow border" style="max-height: 280px;" alt="Salida" />
+                                                }
+                                                else
+                                                {
+
+                                                    <div class="p-5 border rounded bg-white text-muted shadow-sm"><i class="bi bi-camera-video-off fs-1 d-block mb-2"></i>Sin registro</div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" @onclick="CerrarModalFotos">Cerrar</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            }
+                }
+            </div>
         </div>
-
     </div>
-</div>
-
+}
 
 @code {
     private string vistaActual = "dia";
     private string filtroEmpleado = "";
-
+    private string filtroDepartamento = "";
     private bool cargando = false;
 
-    private bool mostrarModalFoto = false;
-    private string fotoSeleccionada = "";
-    private string tipoFotoSeleccionada = "";
-
-    private string numeroSolicitante = "";
-    private PerfilPermisoDto? perfil;
-
-    private bool verificandoAcceso = false;
-    private string mensajeAcceso = "";
+    private bool mostrarModalFotos = false;
+    private string empleadoSeleccionadoNumero = "";
+    private string empleadoSeleccionadoNombre = "";
+    private DateTime fechaSeleccionadaFotos = DateTime.Today;
+    private string fotoEntradaActual = "";
+    private string fotoSalidaActual = "";
+    private bool cargandoFotos = false;
 
     private List<ReporteAsistenciaDto> listaReporte = new();
 
-    private IEnumerable<ReporteAsistenciaDto> EmpleadosFiltrados =>
-        string.IsNullOrWhiteSpace(filtroEmpleado)
-            ? listaReporte
-            : listaReporte.Where(x =>
-                x.NumeroEmpleado.Contains(filtroEmpleado, StringComparison.OrdinalIgnoreCase) ||
-                x.NombreCompleto.Contains(filtroEmpleado, StringComparison.OrdinalIgnoreCase));
+    private bool PuedeFiltrarArea => Auth.PerfilActual?.Rol == "RRHH" || Auth.PerfilActual?.Rol == "RRHHAdmin" || Auth.PerfilActual?.Rol == "Admin";
 
+    private IEnumerable<string> DepartamentosDisponibles => listaReporte.Select(x => x.Departamento).Where(d => !string.IsNullOrEmpty(d)).Distinct().OrderBy(d => d);
 
-
-    private async Task CambiarVista(string vista)
+    private IEnumerable<ReporteAsistenciaDto> EmpleadosFiltrados
     {
-        vistaActual = vista;
-        await CargarReportes();
+        get
+        {
+            var query = listaReporte.AsEnumerable();
+            if (!string.IsNullOrWhiteSpace(filtroDepartamento)) query = query.Where(x => x.Departamento == filtroDepartamento);
+            if (!string.IsNullOrWhiteSpace(filtroEmpleado)) query = query.Where(x => x.NumeroEmpleado.Contains(filtroEmpleado, StringComparison.OrdinalIgnoreCase) || x.NombreCompleto.Contains(filtroEmpleado, StringComparison.OrdinalIgnoreCase));
+            return query;
+        }
     }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.EstaAutenticado)
+        {
+            NavManager.NavigateTo("/login");
+        }
+        else
+        {
+            await CargarReportes();
+        }
+    }
+
+    private async Task CambiarVista(string vista) { vistaActual = vista; await CargarReportes(); }
 
     private async Task CargarReportes()
     {
-        if (perfil == null)
-            return;
-
         cargando = true;
-
         try
         {
-            string url =
-                $"api/Asistencia/reporte" +
-                $"?tipo={vistaActual}" +
-                $"&numeroSolicitante={perfil.NumeroEmpleado}";
-
-            listaReporte =
-                await Http.GetFromJsonAsync<List<ReporteAsistenciaDto>>(url)
-                ?? new();
+            string url = $"api/Asistencia/reporte?tipo={vistaActual}&numeroSolicitante={Auth.PerfilActual!.NumeroEmpleado}";
+            listaReporte = await Http.GetFromJsonAsync<List<ReporteAsistenciaDto>>(url) ?? new();
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine(
-                "Error al cargar reportes: " + ex.Message);
-
-            listaReporte = new();
-        }
-        finally
-        {
-            cargando = false;
-        }
+        catch (Exception) { listaReporte = new(); }
+        finally { cargando = false; }
     }
 
-    private void MostrarFoto(string foto, string tipo)
+    private async Task AbrirModalFotos(string numeroEmpleado, string nombreCompleto)
     {
-        fotoSeleccionada = foto;
-        tipoFotoSeleccionada = tipo;
-        mostrarModalFoto = true;
+        empleadoSeleccionadoNumero = numeroEmpleado;
+        empleadoSeleccionadoNombre = nombreCompleto;
+        fechaSeleccionadaFotos = DateTime.Today;
+        mostrarModalFotos = true;
+        await CargarFotosPorFecha();
     }
 
-    private void CerrarModal()
+    private async Task CargarFotosPorFecha()
     {
-        mostrarModalFoto = false;
-        fotoSeleccionada = "";
-        tipoFotoSeleccionada = "";
-    }
-    private async Task VerificarAcceso()
-    {
-        mensajeAcceso = "";
-
-        if (string.IsNullOrWhiteSpace(numeroSolicitante))
-        {
-            mensajeAcceso = "Ingrese su número de empleado.";
-            return;
-        }
-
-        verificandoAcceso = true;
-
+        cargandoFotos = true;
+        fotoEntradaActual = ""; fotoSalidaActual = "";
         try
         {
-            var respuesta = await Http.GetAsync(
-                $"api/Permisos/perfil/{numeroSolicitante.Trim()}");
-
-            if (!respuesta.IsSuccessStatusCode)
-            {
-                mensajeAcceso = "El usuario no está registrado.";
-                return;
-            }
-
-            perfil = await respuesta.Content
-                .ReadFromJsonAsync<PerfilPermisoDto>();
-
-            if (perfil == null)
-            {
-                mensajeAcceso =
-                    "No fue posible obtener los datos del usuario.";
-                return;
-            }
-
-            bool tieneAcceso =
-                perfil.Rol == "DirectorArea" ||
-                perfil.Rol == "RRHH" ||
-                perfil.Rol == "RRHHAdmin" ||
-                perfil.Rol == "Admin";
-
-            if (!tieneAcceso)
-            {
-                mensajeAcceso =
-                    "No tiene permisos para consultar los reportes.";
-
-                perfil = null;
-                return;
-            }
-
-            await CargarReportes();
+            string fechaStr = fechaSeleccionadaFotos.ToString("yyyy-MM-dd");
+            var respuesta = await Http.GetFromJsonAsync<RespuestaFotosDto>($"api/Asistencia/fotos/{empleadoSeleccionadoNumero}?fecha={fechaStr}");
+            if (respuesta != null) { fotoEntradaActual = respuesta.FotoEntrada; fotoSalidaActual = respuesta.FotoSalida; }
         }
-        catch (Exception ex)
-        {
-            mensajeAcceso =
-                $"Error de conexión: {ex.Message}";
-        }
-        finally
-        {
-            verificandoAcceso = false;
-        }
-    }
-    private void CerrarAcceso()
-    {
-        perfil = null;
-        numeroSolicitante = "";
-        mensajeAcceso = "";
-        filtroEmpleado = "";
-        listaReporte.Clear();
+        catch (Exception) { }
+        finally { cargandoFotos = false; }
     }
 
+    private void CerrarModalFotos() { mostrarModalFotos = false; fotoEntradaActual = ""; fotoSalidaActual = ""; }
+
+    public class RespuestaFotosDto { public string FotoEntrada { get; set; } = ""; public string FotoSalida { get; set; } = ""; }
 }

@@ -34,6 +34,9 @@ namespace Checador.API.Data.Entities
         [Column("Rol")]
         public string Rol { get; set; } = "Empleado";
 
+        [Column("PasswordHash")]
+        public string? PasswordHash { get; set; }
+
         [JsonIgnore]
         public ICollection<Asistencia> Asistencias { get; set; }
             = new List<Asistencia>();

@@ -17,7 +17,6 @@ namespace Checador.API.Controllers
             _context = context;
         }
 
-        // CREAR PERMISO
         [HttpPost]
         public async Task<IActionResult> CrearPermiso(
             [FromBody] CrearPermisoDto dto)
@@ -34,8 +33,6 @@ namespace Checador.API.Controllers
                 });
             }
 
-            // Validar horario permitido
-            // 8:00 AM - 3:00 PM
             var horaMinima = new TimeOnly(8, 0);
             var horaMaxima = new TimeOnly(15, 0);
 
@@ -50,7 +47,6 @@ namespace Checador.API.Controllers
                 });
             }
 
-            // Validar que la hora final sea posterior
             if (dto.HoraFin <= dto.HoraInicio)
             {
                 return BadRequest(new
@@ -60,7 +56,6 @@ namespace Checador.API.Controllers
                 });
             }
 
-            // Validar máximo 2 horas
             var duracion =
                 dto.HoraFin.ToTimeSpan() -
                 dto.HoraInicio.ToTimeSpan();
@@ -74,7 +69,6 @@ namespace Checador.API.Controllers
                 });
             }
 
-            // Máximo 3 permisos por mes
             var inicioMes =
                 new DateOnly(dto.Fecha.Year, dto.Fecha.Month, 1);
 
@@ -99,7 +93,6 @@ namespace Checador.API.Controllers
                 });
             }
 
-            // Crear permiso
             var permiso = new Permiso
             {
                 NumeroEmpleado = dto.NumeroEmpleado,
@@ -123,7 +116,6 @@ namespace Checador.API.Controllers
             });
         }
 
-        // EMPLEADO - VER SUS PROPIOS PERMISOS
         [HttpGet("mis-permisos/{numeroEmpleado}")]
         public async Task<IActionResult> ObtenerMisPermisos(
             string numeroEmpleado)
@@ -150,8 +142,6 @@ namespace Checador.API.Controllers
             return Ok(permisos);
         }
 
-        // DIRECTOR DE ÁREA
-        // VER PERMISOS DE SU DEPARTAMENTO
         [HttpGet("area/{numeroDirector}")]
         public async Task<IActionResult> ObtenerPermisosArea(
             string numeroDirector)
@@ -188,8 +178,6 @@ namespace Checador.API.Controllers
             return Ok(permisos);
         }
 
-        // RRHH / RRHH ADMIN / ADMIN
-        // VER TODOS LOS PERMISOS
         [HttpGet("todos/{numeroSolicitante}")]
         public async Task<IActionResult> ObtenerTodos(
             string numeroSolicitante)
@@ -219,7 +207,6 @@ namespace Checador.API.Controllers
                 return Ok(permisosRRHH);
             }
 
-            // Buscar si es administrador
             var admin = await _context.Administradores
                 .FirstOrDefaultAsync(a =>
                     a.NumeroEmpleado == numeroSolicitante);
@@ -241,22 +228,21 @@ namespace Checador.API.Controllers
             return Ok(permisosAdmin);
         }
 
-        // RRHH ADMIN / ADMIN
-        // AUTORIZAR
+
         [HttpPut("{id}/autorizar")]
         public async Task<IActionResult> AutorizarPermiso(
-            int id,
-            [FromBody] CambiarEstadoPermisoDto dto)
+                    int id,
+                    [FromBody] CambiarEstadoPermisoDto dto)
         {
             var tienePermiso =
-                await PuedeAutorizar(dto.NumeroEmpleadoAutoriza);
+                await PuedeAutorizar(dto.NumeroEmpleadoAutoriza, id);
 
             if (!tienePermiso)
             {
                 return StatusCode(403, new
                 {
                     Mensaje =
-                        "No tiene permisos para autorizar solicitudes."
+                        "No tiene permisos para autorizar solicitudes de esta área."
                 });
             }
 
@@ -265,20 +251,12 @@ namespace Checador.API.Controllers
 
             if (permiso == null)
             {
-                return NotFound(new
-                {
-                    Mensaje = "El permiso no existe."
-                });
+                return NotFound(new { Mensaje = "El permiso no existe." });
             }
 
             if (permiso.Estado != "Pendiente")
             {
-                return BadRequest(new
-                {
-                    Mensaje =
-                        $"El permiso ya se encuentra en estado " +
-                        $"{permiso.Estado}."
-                });
+                return BadRequest(new { Mensaje = $"El permiso ya se encuentra en estado {permiso.Estado}." });
             }
 
             permiso.Estado = "Autorizado";
@@ -287,29 +265,24 @@ namespace Checador.API.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(new
-            {
-                Mensaje = "Permiso autorizado correctamente."
-            });
+            return Ok(new { Mensaje = "Permiso autorizado correctamente." });
         }
 
-        // RRHH ADMIN / ADMIN
-        // RECHAZAR
 
         [HttpPut("{id}/rechazar")]
         public async Task<IActionResult> RechazarPermiso(
-            int id,
-            [FromBody] CambiarEstadoPermisoDto dto)
+                    int id,
+                    [FromBody] CambiarEstadoPermisoDto dto)
         {
             var tienePermiso =
-                await PuedeAutorizar(dto.NumeroEmpleadoAutoriza);
+                await PuedeAutorizar(dto.NumeroEmpleadoAutoriza, id);
 
             if (!tienePermiso)
             {
                 return StatusCode(403, new
                 {
                     Mensaje =
-                        "No tiene permisos para rechazar solicitudes."
+                        "No tiene permisos para rechazar solicitudes de esta área."
                 });
             }
 
@@ -318,20 +291,12 @@ namespace Checador.API.Controllers
 
             if (permiso == null)
             {
-                return NotFound(new
-                {
-                    Mensaje = "El permiso no existe."
-                });
+                return NotFound(new { Mensaje = "El permiso no existe." });
             }
 
             if (permiso.Estado != "Pendiente")
             {
-                return BadRequest(new
-                {
-                    Mensaje =
-                        $"El permiso ya se encuentra en estado " +
-                        $"{permiso.Estado}."
-                });
+                return BadRequest(new { Mensaje = $"El permiso ya se encuentra en estado {permiso.Estado}." });
             }
 
             permiso.Estado = "Rechazado";
@@ -340,13 +305,9 @@ namespace Checador.API.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(new
-            {
-                Mensaje = "Permiso rechazado correctamente."
-            });
+            return Ok(new { Mensaje = "Permiso rechazado correctamente." });
         }
 
-        // EMPLEADO - CANCELAR SU PERMISO
         [HttpPut("{id}/cancelar/{numeroEmpleado}")]
         public async Task<IActionResult> CancelarPermiso(
             int id,
@@ -391,27 +352,35 @@ namespace Checador.API.Controllers
             });
         }
 
-        // MÉTODO INTERNO
-        // COMPROBAR RRHH ADMIN O ADMIN
-        private async Task<bool> PuedeAutorizar(
-            string numeroEmpleado)
+        private async Task<bool> PuedeAutorizar(string numeroEmpleadoAutoriza, int permisoId)
         {
             var empleado = await _context.Empleados
-                .FirstOrDefaultAsync(e =>
-                    e.NumeroEmpleado == numeroEmpleado);
+                .FirstOrDefaultAsync(e => e.NumeroEmpleado == numeroEmpleadoAutoriza);
 
-            if (empleado != null &&
-                empleado.Rol == "RRHHAdmin")
+            if (empleado != null)
             {
-                return true;
+                if (empleado.Rol == "RRHHAdmin")
+                {
+                    return true;
+                }
+
+                if (empleado.Rol == "DirectorArea")
+                {
+                    var permiso = await _context.Permisos
+                        .Include(p => p.Empleado)
+                        .FirstOrDefaultAsync(p => p.Id == permisoId);
+
+                    if (permiso != null && permiso.Empleado.Departamento == empleado.Departamento)
+                    {
+                        return true;
+                    }
+                }
             }
 
             var admin = await _context.Administradores
-                .FirstOrDefaultAsync(a =>
-                    a.NumeroEmpleado == numeroEmpleado);
+                .FirstOrDefaultAsync(a => a.NumeroEmpleado == numeroEmpleadoAutoriza);
 
-            if (admin != null &&
-                admin.Rol == "Admin")
+            if (admin != null && admin.Rol == "Admin")
             {
                 return true;
             }
@@ -419,7 +388,6 @@ namespace Checador.API.Controllers
             return false;
         }
 
-        // OBTENER PERFIL Y ROL
         [HttpGet("perfil/{numeroEmpleado}")]
         public async Task<IActionResult> ObtenerPerfil(string numeroEmpleado)
         {

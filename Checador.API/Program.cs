@@ -35,9 +35,6 @@ namespace Checador.API
 
             app.UseCors("AllowAll");
 
-            // Desactivado durante desarrollo.
-            // Evita redirecciones de http://localhost:5151
-            // hacia HTTPS.
             // app.UseHttpsRedirection();
 
             app.UseAuthorization();

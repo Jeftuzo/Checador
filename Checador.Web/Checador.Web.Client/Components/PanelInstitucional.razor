@@ -1,64 +1,37 @@
 ﻿@using Microsoft.AspNetCore.Components
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
 
-<div style="
-    min-height: 100vh;
-    width: 100%;
-    background-color: #960E53;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 40px;
-    text-align: center;">
+<div style="min-height: 100vh; width: 100%; background-color: #960E53; color: white; display: flex; flex-direction: column; justify-content: space-between; padding: 40px; text-align: center;">
 
-    <!-- LOGO SUPERIOR -->
+    <!-- logo principal -->
     <div style="margin-top: 20px;">
-        <img src="/Images/direccion-general-del-registro-civil.png"
-             alt="Gobierno de Sonora"
+        <img src="@Config["UIParams:LogoPrincipal"]"
+             alt="Logo Institución"
              style="width: 220px; max-width: 80%;" />
     </div>
 
-    <!-- TEXTO CENTRAL -->
+    <!-- centro -->
     <div>
         <h2 class="fw-bold mb-4">
-            Registro Civil
+            @Config["UIParams:TituloPrincipal"]
         </h2>
 
-        <p style="
-            font-size: 1.1rem;
-            line-height: 1.6;
-            max-width: 500px;
-            margin: 0 auto;">
+        <p style="font-size: 1.1rem; line-height: 1.6; max-width: 500px; margin: 0 auto;">
             @Texto
         </p>
     </div>
 
-    <!-- INFORMACIÓN INFERIOR -->
-    <div class="d-flex align-items-center justify-content-center text-start"
-         style="margin-bottom: 20px;">
+    <!-- Pie de pagina -->
+    <div class="d-flex align-items-center justify-content-center text-start" style="margin-bottom: 20px;">
 
-        <img src="/Images/logo-sonora.png"
-             class="me-3"
-             style="width: 130px;"
-             alt="Sonora" />
+        <img src="@Config["UIParams:LogoSecundario"]" class="me-3" style="width: 130px;" alt="Logo Secundario" />
 
-        <div style="
-            font-size: 0.85rem;
-            border-left: 1px solid rgba(255,255,255,0.4);
-            padding-left: 15px;">
-
-            <strong>Dirección General de Registro Civil</strong>
-            Centro de Gobierno<br />
-
-            Edificio Sonora Sur Planta Baja,
-            Blvd. Paseo Río Sonora y Comonfort,
-            C.P. 83280<br />
-
-            Hermosillo, Sonora, México.
+        <div style="font-size: 0.85rem; border-left: 1px solid rgba(255,255,255,0.4); padding-left: 15px;">
+            <strong>@Config["UIParams:Subtitulo"]</strong><br />
+            @Config["UIParams:Direccion"]
         </div>
 
     </div>
-
 </div>
 
 @code {

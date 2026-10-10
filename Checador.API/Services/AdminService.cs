@@ -34,8 +34,7 @@ namespace Checador.API.Services
                 NumeroEmpleado = dto.NumeroEmpleado,
                 Rol = "Admin",
 
-                // Mejora futura: lector de huella biométrica.
-                // Por ahora el sistema no depende de este campo.
+                // Mejora futura: lector de huella.
                 Huella = dto.Huella
             };
 

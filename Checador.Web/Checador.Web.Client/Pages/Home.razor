@@ -5,6 +5,7 @@
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
 @inject IJSRuntime JS
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
 @using Checador.Web.Client.Dtos
 @using Checador.Web.Client.Dtos.AdminsDtos
 @using Microsoft.AspNetCore.Components.Forms
@@ -81,7 +82,6 @@ else
 {
     <div class="container-fluid vh-100 p-0 position-relative">
 
-        @* BOTÓN PARA REGRESAR AL MENÚ PRINCIPAL *@
         <div class="position-absolute top-0 end-0 m-3"
              style="z-index: 1000;">
             <a href="/menu"
@@ -97,36 +97,30 @@ else
                  style="background-color: #960E53; color: white; display: flex; flex-direction: column; justify-content: space-between; padding: 40px;">
 
                 <div style="margin-top: 20px;">
-                    <img src="Images/direccion-general-del-registro-civil.png"
-                         alt="Gobierno de Sonora"
-                         width="200" />
+                    <img src="@Config["UIParams:LogoPrincipal"]"
+                         alt="Logo Institucional"
+                         style="width: 220px; max-width: 80%;" />
                 </div>
 
                 <div>
-                    <h2 class="fw-bold mb-4">Registro Civil</h2>
+                    <h2 class="fw-bold mb-4">@Config["UIParams:TituloPrincipal"]</h2>
 
                     <p class="px-5"
                        style="font-size: 1.1rem; line-height: 1.6;">
-                        Sistema de asistencia. Ingresa tu número de empleado y colócate frente a la cámara para registrar tu entrada o salida.
+                        Sistema de asistencia institucional. Ingresa tu número de empleado y colócate frente a la cámara para registrar tu entrada o salida.
                     </p>
                 </div>
 
                 <div class="d-flex align-items-center justify-content-center text-start"
                      style="margin-bottom: 20px;">
 
-                    <img src="Images/logo-sonora.png"
+                    <img src="@Config["UIParams:LogoSecundario"]"
                          class="me-3"
-                         width="100" />
+                         style="width: 130px;" alt="Logo Secundario" />
 
-                    <div style="font-size: 0.85rem; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 15px;">
-                        <strong>Dirección General de Registro Civil</strong>
-                        Centro de Gobierno<br />
-
-                        Edificio Sonora Sur Planta Baja,
-                        Blvd. Paseo Río Sonora y Comonfort,
-                        C.P. 83280<br />
-
-                        Hermosillo, Sonora, México.
+                    <div style="font-size: 0.85rem; border-left: 1px solid rgba(255,255,255,0.4); padding-left: 15px;">
+                        <strong>@Config["UIParams:Subtitulo"]</strong><br />
+                        @Config["UIParams:Direccion"]
                     </div>
 
                 </div>
@@ -320,8 +314,7 @@ else
                 Huella = "BYPASS_SETUP_AUTOMATICO"
             };
 
-          
-            var respuesta = await Http.PostAsJsonAsync("api/Admin/registrar-inicial",adminDefault);
+            var respuesta = await Http.PostAsJsonAsync("api/Admin/registrar-inicial", adminDefault);
 
             if (respuesta.IsSuccessStatusCode)
             {
@@ -364,13 +357,9 @@ else
             }
 
             registro.Foto = fotoBase64;
-
-            // Primera petición
             registro.ConfirmarSalidaAnticipada = false;
 
-           
-
-            var respuesta = await Http.PostAsJsonAsync("api/Asistencia/registrar",registro);
+            var respuesta = await Http.PostAsJsonAsync("api/Asistencia/registrar", registro);
 
             var opcionesJson =
                 new System.Text.Json.JsonSerializerOptions
@@ -382,7 +371,6 @@ else
                 await respuesta.Content.ReadFromJsonAsync<RespuestaApi>(
                     opcionesJson);
 
-            // NECESITA CONFIRMACIÓN DE SALIDA ANTICIPADA
             if (resultado?.RequiereConfirmacion == true)
             {
                 bool confirmar = await JS.InvokeAsync<bool>(
@@ -394,11 +382,9 @@ else
                     esExito = false;
                     mensajeResultado =
                         "Registro de salida cancelado.";
-
                     return;
                 }
 
-                // Usuario confirmó
                 registro.ConfirmarSalidaAnticipada = true;
 
                 var segundaRespuesta =
@@ -412,7 +398,6 @@ else
                 if (segundaRespuesta.IsSuccessStatusCode)
                 {
                     esExito = true;
-
                     mensajeResultado =
                         resultadoConfirmado?.Mensaje ??
                         "Salida registrada correctamente.";
@@ -420,7 +405,6 @@ else
                 else
                 {
                     esExito = false;
-
                     mensajeResultado =
                         resultadoConfirmado?.Mensaje ??
                         "No fue posible registrar la salida.";
@@ -429,11 +413,9 @@ else
                 return;
             }
 
-            // REGISTRO NORMAL
             if (respuesta.IsSuccessStatusCode)
             {
                 esExito = resultado?.Exito ?? true;
-
                 mensajeResultado =
                     resultado?.Mensaje ??
                     "Registro realizado correctamente.";
@@ -441,7 +423,6 @@ else
             else
             {
                 esExito = false;
-
                 mensajeResultado =
                     resultado?.Mensaje ??
                     "No fue posible registrar la asistencia.";
@@ -450,41 +431,28 @@ else
         catch (Exception ex)
         {
             esExito = false;
-
             mensajeResultado =
                 $"Error de conexión: {ex.Message}";
         }
         finally
         {
             procesando = false;
-
-            // Siempre dejar la confirmación nuevamente en false
             registro.ConfirmarSalidaAnticipada = false;
-
-            // Limpiar número de empleado
             registro.NumeroEmpleado = "";
 
             await Task.Delay(100);
-
             await inputNumeroEmpleado.FocusAsync();
         }
     }
 
     private async Task RegistrarPrimerAdmin()
     {
-        // if (string.IsNullOrEmpty(nuevoAdmin.Huella))
-        // {
-        //     mensajeSetup = "Por favor, coloque su dedo en el lector o use el botón de registro manual.";
-        //     return;
-        // }
-
         procesando = true;
         mensajeSetup = "";
 
         try
         {
-            
-            var respuesta = await Http.PostAsJsonAsync("api/Admin/registrar-inicial",nuevoAdmin);
+            var respuesta = await Http.PostAsJsonAsync("api/Admin/registrar-inicial", nuevoAdmin);
 
             if (respuesta.IsSuccessStatusCode)
             {
@@ -508,9 +476,7 @@ else
     public class RespuestaApi
     {
         public bool Exito { get; set; }
-
         public bool RequiereConfirmacion { get; set; }
-
         public string Mensaje { get; set; } = "";
     }
 }

@@ -13,8 +13,7 @@ namespace Checador.Web.Client.Dtos.AdminsDtos
         [Required(ErrorMessage = "El puesto es obligatorio")]
         public string Puesto { get; set; } = "";
 
-        // Mejora futura: autenticación mediante lector biométrico.
-        // Actualmente no es obligatorio.
+        // Mejora futura: autenticacion mediante lector de huella.
         public string? Huella { get; set; }
     }
 }

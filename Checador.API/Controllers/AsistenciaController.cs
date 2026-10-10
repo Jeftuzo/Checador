@@ -102,5 +102,22 @@ namespace Checador.API.Controllers
                 });
             }
         }
+
+        [HttpGet("fotos/{numeroEmpleado}")]
+        public async Task<IActionResult> GetFotosEmpleado(string numeroEmpleado, [FromQuery] string fecha)
+        {
+            if (!DateTime.TryParse(fecha, out DateTime fechaConsulta))
+            {
+                return BadRequest(new { Mensaje = "Formato de fecha incorrecto." });
+            }
+
+            var resultado = await _asistenciaService.ObtenerFotosPorFechaAsync(numeroEmpleado, fechaConsulta);
+
+            return Ok(new
+            {
+                FotoEntrada = resultado.FotoEntrada,
+                FotoSalida = resultado.FotoSalida
+            });
+        }
     }
 }

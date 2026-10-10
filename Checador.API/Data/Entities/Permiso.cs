@@ -32,8 +32,6 @@ namespace Checador.API.Data.Entities
         [MaxLength(20)]
         public string Estado { get; set; } = "Pendiente";
 
-        // Guardaremos quién autorizó/rechazó el permiso.
-        // Después lo conectaremos con el sistema de usuarios/roles.
         [MaxLength(100)]
         public string? AutorizadoPor { get; set; }
 

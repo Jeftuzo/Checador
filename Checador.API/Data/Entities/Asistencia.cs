@@ -29,19 +29,15 @@ namespace Checador.API.Data.Entities
         [Column("horaSalida")]
         public DateTime? HoraSalida { get; set; }
 
-        // Foto tomada al registrar la entrada
         [Column("fotoEntrada")]
         public string? FotoEntrada { get; set; }
 
-        // Foto tomada al registrar la salida
         [Column("fotoSalida")]
         public string? FotoSalida { get; set; }
 
-        // Indica si registró salida antes de la hora normal
         [Column("salidaAnticipada")]
         public bool SalidaAnticipada { get; set; } = false;
 
-        // Si la salida estaba relacionada con un permiso
         [Column("permisoId")]
         public int? PermisoId { get; set; }
 
