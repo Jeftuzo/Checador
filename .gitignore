@@ -363,8 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Ignorar imágenes institucionales privadas
-Checador.Web/wwwroot/Images/Privadas/
+**/wwwroot/Images/Privadas/
 
 # Ignorar configuraciones locales (Textos reales)
-Checador.Web/wwwroot/appsettings.Development.json
-Checador.Web.Client/wwwroot/appsettings.Development.json
+**/appsettings.Development.json
